@@ -1,0 +1,16 @@
+## Concluding Insights
+
+What we have found out is that none of the predictors in the models were able to helpfully predict the outcome on the tasks. This means one of two things: 1) That we need to collect more data to understand the relationship between all these variables and the outcome behavioral task or 2) That none of the collected attributes predict the outcome well. For this specific data set no algorithm can get better results than just guessing the most common outcome for every subject. This is because this dataset is highly skewed. This example illustrates an important lesson in the importance of having symmetrically distributed outcome variables.
+
+You will also notice that there wasn't a significant increase in prediction accuracy between the simplest models and the most complicated (computationally expensive) models. This is true across most machine learning problems. Often the simplest models do a good job at predicting and more complicated models don't increase predictive accuracy a huge amount. The more hyperparameters you tune and the more cross-validation loops you add, the more you can usually expect a slight increase in predictive accuracy. So when you are engaging in these practices yourself its good to temper expectations with wildly improving models with increased computing power. You typically get diminishing returns when adding complexity. After a certain point adding complexity is only causing your model to overfit to the current data set and therefore perform poorly on new data.
+
+Wait, so after all that work what do we have? While we dealt with missing data, completed all necessary assumption checks per model, ran hyperparameter tuning to help fitting, and ran multiple algorithms...what we eventually got was a bunch of models that performed poorly and don’t have good spread across prediction. This is an extremely important lesson: machine learning isn’t a magic wand that will generate significant effects out of thin air. Not all datasets are predictive for every research question! Machine learning can’t replace collecting lots of good representative data, or asking appropriate research questions – that’s up to you. Luckily, you now have the skills to apply classification machine learning to a new question.
+
+I hoped this tutorial was helpful! If you want to learn more about any of the concepts I referenced in this tutorial please look through my references section as well as the linked websites throughout. The three textbooks I used for this tutorial were invaluable to my progress in machine learning and all three can be accessed free online. Happy Predicting!
+
+::: {style="text-align: center;"}
+**YOU DID IT!!!**
+:::
+::: {style="text-align: center;"}
+![](https://media4.giphy.com/media/g9582DNuQppxC/200.gif)
+:::

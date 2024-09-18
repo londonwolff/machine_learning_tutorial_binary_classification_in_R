@@ -1,0 +1,1427 @@
+---
+title: "Beginners Guide to Machine Learning Binary Classification Problems in R"
+author: "London Wolff"
+date: "2024-02-20"
+output: html_document
+---
+
+# Overview & Scope of Tutorial
+
+The purpose of this tutorial is to give a brief example of how to use machine learning classification techniques on an example dataset from the animal behavior field. In this tutorial I will cover 1) the five main types of classification models and when to use them; 2) how to set up and clean data to use in classification machine learning, and 3) how to run models and compare the outcomes. I propose three different questions that could be answered with machine learning classification to showcase how the types of predictor and outcome variables you are working with impacts what models to run and with what [hyperparameters](#hyperparameters). (Throughout the tutorial, you'll see highlighted vocab terms like hyperparameters - click to see the definition and then click that word again to return to the text). The data used in this tutorial is from a team science open access dataset from the [Many Dogs Project](https://manydogsproject.github.io/), and the number and type of variables makes it an excellent example dataset to use with classification machine learning. For a more extensive description of the dataset please see the [data description](#sec2) section.
+
+This tutorial is *not* meant to be an exhaustive list of what can be done with machine learning. I only cover supervised learning for binary classification problems. I do not cover any inductive processes like deep learning (aka neural nets), semi-supervised learning, unsupervised learning, or how to deal with continuous dependent variables. See links within text for more detail on these applications.This tutorial also assumes you have a basic understanding of simple statistical concepts like distributions and categorical vs. continuous variables, and some exposure to basic models like linear regression. If the terms in that last sentence weren’t familiar to you, check out the resources at [PsyTeachR](https://psyteachr.github.io/) for an introduction to statistics.
+
+The following libraries are needed to run this tutorial in R. Before you code anything, make sure you have the following installed and updated. For further instruction on how to install and/or update packages visit the following [link](https://www.neonscience.org/resources/learning-hub/tutorials/packages-r). The following code should be copied and pasted to get you to the needed dataset that we will be using in this tutorial. Throughout the code I have written comments that tell you what each step in the data process does.
+
+```{r setup, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+library(tidyverse) # for data wrangling
+library(knitr) # for showing you pretty pictures and making tables
+library(here) # for keeping track of where to get files needed for this tutorial
+library(janitor) # for examining and cleaning data
+library(ggpubr) # to make Q-Q plots for testing normality
+library(car) # for making component plus resistance (CR) plots to check for linearity
+library(mlr) # for doing machine learning in R!
+library(parallelMap) # for running code using all of the available processing power on your computer
+library(parallel) # for running code using all of the available processing power on your computer
+library(randomForest) # for running the random forest algorithm
+```
+
+# What is Machine Learning?
+
+In data science, "machine learning" refers to a set of mathematical models that use a dataset to help make predictions about what is likely to happen if you collected more data. Therefore, machine learning is one of the only known ways to predict the future! These models can vary from simple models you already are probably familiar with, like linear or logistic regression, to models you probably are not familiar with such as Decision trees/Random forest, K nearest neighbor models, Naive Bayes, Support vector machines (SVM), and much more!
+
+Many people conflate machine learning with artificial intelligence or deep learning, but that is often not what data scientists are using when they work with machine learning algorithms. There are many levels and branches of machine learning that vary widely in their application and function. The simplest version can be as simple as a normal probability distribution, while the fanciest versions are so complex not even the designers have a way of understanding what the computer did to get the output values. These "black boxes" of computing are often what people envision when they hear the term "machine learning". However, machine learning never has to reach that level of complexity for it to be an invaluable tool for a data scientist. Machine learning is worth the time to learn because it can help alleviate some of the systemic replication issues in psychology and other fields as it is a far more rigorous way of making claims and predictions with data. 
+
+A helpful way to understand machine learning is to tie it to what you (probably) already know and use. Let's take a step back and discuss how linear and logistic regression are used in machine learning to understand the difference between machine learning and the models you already use. On their own, regression analyses are intended to describe a pattern or relationship between variables in data without making predictions about how new data would map onto trends. The difference between running a linear regression model and running a linear regression model *with machine learning* is that simply running the model tells you the probability of a relationship between the variables in your specific dataset, while running the model with machine learning allows you to *predict if you will see similar results given more data*. This is made possible by breaking the data into training and testing sets, and then creating models on the training data that can then be tested on the testing data. By testing your model on new data that wasn't involved in creating the model, you can know how well your model will do on data you have yet to collect!
+
+Another major difference is that while standard modeling practices require you to select your model structure ahead of time, in machine learning, you don't know what model is the correct one to use initially. You can never choose a correct model based on characteristics of your data alone. Instead, the characteristics of your data can tell you which class of models to investigate, but the only way to determine which model should be used is by running all the models that are relevant (or that you have time and computing power for) and compare how well each performs on unseen data. 
+
+# What is Classification Machine Learning and How do You Do It?
+
+So, if that's what machine learning is: what is classification machine learning? Great question! I'm so glad you asked! In this tutorial we are interested in data sets where the outcome variable (aka dependent variable) is [discrete or ordinal](#variables), and we are therefore trying to predict what category a subject will end up in. That is called classification. Classification falls under the supervised learning umbrella because I have *predictors* that are either [continuous](#variables) or [binary](#binary), and I am interested in classifying these predictors based on a discrete categorical *outcome* variable. 
+
+To begin to conceptualize what you should do on a classification machine learning journey let's break it down into 5 simple parts:
+![](http://90s90s90s.tumblr.com/post/52732959318)
+
+1. Exploring data and checking assumptions
+2. Set a randomization component and partition the data into training and test sets
+3. Run the cross validation approach of your choosing
+4. Choose what models you plan to run based on the type of variables in your data and then run these models with the different cross validation sets
+5. Assess how well each model did on predicting the test set data
+  
+  *YOU DID MACHINE LEARNING!*
+
+So simple, right? Okay, so maybe you aren't ready to go run models on your own yet ;) Let's discuss what each step does and why before we jump into how to do it:
+
+1. **Exploring data and checking assumptions**: Before you can run any models you need to explore your dataset to understand what types of variables you have, clean up the data, and deal with any missing values. You'll also need to check what assumptions are present within your dataset so that you can choose the correct kind of models in Step 4.
+2. **Set a seed and partition the data**: You break data into training and test sets so that you can reserve the testing data to evaluate how the model you create performs on new, unseen data. The test set is the unseen data, and the training data is what you use to test model performance. When you break apart your data like this, you have to set a seed (i.e., a randomization component) so that the random way in which you break the data apart to be used for training and testing is reproducible by anyone running your code (including you, when you come back to rerun your analyses!).
+3. **Run the cross validation*: You use [cross validation](#crossval) to reduce the error you get when running just one training and test set. If you forgo this step, you are assuredly going to get a more biased estimation of which model performs the best because of random noise in the data, rather than the truth of the relationship between your predictors and outcome variables.
+4. **Choose your models and run with different cross validation sets**: Using the characteristics of your data (number of predictors, type of outcome variables, etc.) and [model assumptions](#assumptions) (colinearity, outliers, normality, etc.) you can narrow down your analysis to a number of models that you *could* use to make predictions with a specific dataset. However, you cannot know what single model will run best until you actually run the models and compare the outcomes.
+5. **Assess model performance**: After you have run all the models that you are interested in, you then need to determine how well each model predicted the test set or unseen data [generalization error](#generror), and how well a models predictions match the true values in the training data's [cost/loss function](#losscostfunction) (loss and cost functions are often used interchangeably). You can do this by calculating both. In things like logistic regression this can be as simple as the percent of categories predicted correctly, or as complex as an ROC graph.
+
+One last thing before we get to the example: while I mentioned that I'm not going to be covering deep learning (aka neural nets), semi-supervised learning, unsupervised learning, or how to deal with quantitative predictions, I think it's helpful to feel like you are hip with the lingo if you know the [difference between all these terms](https://www.sas.com/en_gb/insights/articles/analytics/machine-learning-algorithms.html). The difference between supervised, unsupervised, and semi-supervised is very simple. In *supervised learning* your data has predictors and an outcome variable. In *unsupervised learning* your data just has predictors and no responses. Instead of looking at how your dependent variable is impacted by an independent variable, unsupervised machine learning has a number of variables and looks to create groups within data based on similarities and differences. For example, we might be interested in predicting what regions of the brain show similar connectivity patterns, without having any prior knowledge of what regions are functionally related. In semi-supervised your data has a mix of both: some of your data has responses and some doesn't, and you do a mix of both methods on each subset of the data. *Deep learning* is a term that means you are using a specific model class called neural networks. *Neural networks* can be either supervised, semi-supervised, or unsupervised. It just depends on what kind of IV and DVs you are feeding the model. For more information on when to use what algorithm see this [blog post](https://blogs.sas.com/content/subconsciousmusings/2020/12/09/machine-learning-algorithm-use/). There are more models within machine learning than would be possible to speak on and more are being created as I write this. Some of these models can be used in both classification that I discuss here and quantitative prediction, but I will only be discussing them in terms of classification.
+
+![ml_cheet_sheet](https://blogs.sas.com/content/subconsciousmusings/files/2017/04/machine-learning-cheet-sheet-2-1024x576.png)
+
+# Data Description {#sec2}
+
+The data being used in this tutorial is from the [ManyDogs Project](https://manydogsproject.github.io/), a large multi-lab collaboration where dogs from across the world all completed the same two behavioral tasks and information about the dog was collected via survey from owners. The two behavioral tasks were variations on a two-alternative object choice task. Simply put, dogs were asked to choose between two cups. In both conditions/tasks an unknown human pointed at the "correct" choice/cup. In one task, *ostensive*, pointing was accompanied with eye gazing and calling the dog's name. In the other condition, *non-ostensive*, the unknown human simply pointed without other cues. There were also warm-up trials to familiarize the dog with the task as well as an odor control condition, but we will not be using either of these in this tutorial. The survey data collected included breed, age, sex of the dog, training frequency, and values from the CBARQ. The CBARQ is a widely used tool in the field of canine behavioral research, which assesses aspects of dog behavior, temperament, and personality. For a complete list of all variables in the dataset see the [github repository](https://github.com/ManyDogsProject/md1_datapaper) README file. 
+
+```{r, echo=FALSE}
+knitr::include_graphics("md1_setup.jpg")
+```
+  
+  This dataset is a great example to use when investigating machine learning predictive classification models, as it has many possible predictors to investigate with a discrete binary dependent variable (i.e. the dog's cup choice). Furthermore, all the data from this project is available to anyone to share or adapt with attribution, which makes it ideal to use as a learning tool. To work through this tutorial with me, you will first need to download the data from the github repo associated with the project and/or create a local clone of the project repo on your computer. For more information on how to use github go [here](https://docs.github.com/en/desktop/overview/getting-started-with-github-desktop).
+  
+  Once you have downloaded the data files from the github repo, make sure the data file manydogs_etal_2024_data is in the same file path as the R file you are working in. When they are in the same file path you can use the following code to read the data into your R file and begin working with the data!
+
+```{r, echo=TRUE}
+
+manydogs_data <- read.csv("manydogs_etal_2024_data.csv") # Read in the data file I will be using
+
+head(colnames(manydogs_data), n = 20) #show first 20 names of each column in the data
+
+```
+
+# Research Questions to Investigate
+  
+  In this tutorial we will be assessing how to answer the following three questions: 
+  
+1. Does the amount of training a dog has completed (as reported by their owner on a survey) predict whether a dog will perform under or over chance on the ostensive behavioral task?
+2. Does the amount of training a dog has completed predict whether a dog will perform under or over chance on the nonostensive behavioral task?
+3. Do any specific dog characteristics (training, sex, age, etc.) predict whether a dog is more likely to be perform better at the nonostensive than the ostensive behavioral task? 
+
+The first two questions have a very similar structure to each other, with a slight change in our outcome (i.e., our dependent variable). These are the simpler forms of classification models, which compare one continuous variable to one discrete binary variable. Question three adds a number of predictor variables, yet the binary discrete dependent variable is changed to add information about both types of behavioral tasks instead of looking at one at a time. Hopefully by working through these three questions you will get a better sense of how to choose what models to run, how to choose between models to get the best performing model, and how to change code in each model to account for different parameters.
+
+# Step 1: Exploring Data and Checking Assumptions
+
+## Data Set-up: Tidying and feature selection
+
+Before you can begin working with your data you must make sure that each row is a single observation, and each column is a single variable/predictor. This type of data set-up or "wrangling" is known as "tidy data". There are many readily available tutorials and textbooks that help you understand tidy data and how to clean and wrangle data to make it tidy. I recommend the [Tidyverse](https://r4ds.had.co.nz/tidy-data.html) chapter in the R data science textbook to start. Thankfully, the dataset from ManyDogs is already tidy so for this tutorial we can skip this step. 
+
+After your data is tidy, the next step before is to complete feature selection. [*Feature selection*](#feature) is a fancy term for removing variables you aren't going to analyze and creating new ones by computing any necessary variables.
+
+Many of the changes you complete in this step are decided on through [domain knowledge](https://corporatefinanceinstitute.com/resources/data-science/domain-knowledge-data-science/): applying what you know about the field of research to make judgement calls on what is and isn't important to the model/data. The rest of our decisions depend on our specific research questions. Anything in the data set that does not specifically pertain to our research questions need to be eliminated to increase statistical power and to compute the model faster to save computing resources. Commonly deleted variables at this stage might include meta-data such as time of day when a survey was completed, or individual scale items when we have calculated the total scores. When domain knowledge doesn't suffice because you are working in a relatively new field, or past studies have conflicting information, you will want to let machine learning algorithms help choose what to keep and eliminate. See the [regularization](#regularization) section for more information.  
+
+In our ManyDogs example, our feature selection will include transforming all the levels of scales from words to values, add 0s to denote no household dogs other than the one in the study, computing average scores for each section of the CBARQ, and computing our binary outcome variables. We will then cut any remaining columns that will not be needed for analysis.
+
+Reminder: The following code should be copied and pasted to get you to the needed dataset that we will be using in this tutorial.
+
+```{r, echo=TRUE}
+
+#The following code creates a new dataframe where all of the scales are changed from words to numbers so they can be used as discrete categorical data in the models we will create in this tutorial
+manydogs_data_transformed <- manydogs_data |>
+  mutate(across(c(cbarq_train_1:cbarq_train_8), ~case_when(   #Change all scales from words to numbers
+    . == "Never" ~0,
+    . == "Seldom" ~1,
+    . == "Sometimes" ~2,
+    . == "Usually" ~3,
+    . == "Always" ~4
+  ))) |> 
+  mutate(across(c(cbarq_aggression_1:cbarq_aggression_27), ~case_when(
+    . == "No aggression" ~ 0, 
+    . == "Mild aggression" ~ 1,
+    . == "Moderate aggression" ~2,
+    . == "High aggression" ~3, 
+    . == "Serious aggression" ~4
+  ))) |> 
+  mutate(across(c(cbarq_fear_1:cbarq_fear_18), ~case_when(
+    . == "No fear" ~ 0, 
+    . == "Mild fear" ~ 1,
+    . == "Moderate fear" ~2,
+    . == "High fear" ~3, 
+    . == "Extreme fear" ~4
+  ))) |> 
+  mutate(across(c(cbarq_separation_1:cbarq_separation_8), ~case_when(
+    . == "Never" ~0,
+    . == "Seldom" ~1,
+    . == "Sometimes" ~2,
+    . == "Usually" ~3,
+    . == "Always" ~4
+  ))) |> 
+  mutate(across(c(cbarq_excitability_1:cbarq_excitability_6), ~case_when(
+    . == "No excitability" ~ 0, 
+    . == "Mild excitability" ~ 1,
+    . == "Moderate excitability" ~2,
+    . == "High excitability" ~3, 
+    . == "Extreme excitability" ~4
+  ))) |> 
+  mutate(across(c(cbarq_attachment_1:cbarq_attachment_6), ~case_when(
+    . == "Never" ~0,
+    . == "Seldom" ~1,
+    . == "Sometimes" ~2,
+    . == "Usually" ~3,
+    . == "Always" ~4
+  ))) |> 
+  mutate(across(c(cbarq_miscellaneous_1:cbarq_miscellaneous_27), ~case_when(
+    . == "Never" ~0,
+    . == "Seldom" ~1,
+    . == "Sometimes" ~2,
+    . == "Usually" ~3,
+    . == "Always" ~4
+  ))) |> 
+  mutate(sex = case_when(sex == "Female" ~1, sex == "Male" ~2),
+         desexed = case_when(desexed == "Yes" ~1, desexed == "No" ~2),
+         purebred = case_when(purebred == "Yes"~1, purebred == "No" ~2),
+         gaze_follow = case_when(gaze_follow == "Never" ~ 1, 
+                                 gaze_follow == "Seldom" ~2,
+                                 gaze_follow == "Sometimes"~3,
+                                 gaze_follow == "Usually" ~4,
+                                 gaze_follow == "Always" ~5),
+         num_household_dogs = ifelse(is.na(num_household_dogs), 0, num_household_dogs)) |>  #add 0s to indicate when no other dogs were in the household
+  mutate(across(c(cbarq_train_1:cbarq_train_8,cbarq_aggression_1:cbarq_miscellaneous_27), as.numeric))  #change character columns to numeric columns so R understand how to use them
+
+
+#Create a data frame that calculates composite scores for each subset of the scale and computes our three binary outcome variables
+manydogs_feature_selection <- manydogs_data_transformed |> 
+  mutate(training_score = rowMeans(select(manydogs_data_transformed,   #compute average scores of training
+                             starts_with("cbarq_train_")), na.rm = TRUE),
+         aggression_score= rowMeans(select(manydogs_data_transformed,   #compute average scores of aggression
+                             starts_with("cbarq_aggression_")), na.rm = TRUE),
+         fear_score= rowMeans(select(manydogs_data_transformed,    #compute average scores of fear
+                         starts_with("cbarq_fear_")), na.rm = TRUE),
+         separation_score= rowMeans(select(manydogs_data_transformed,    ##compute average scores of separation issues
+                              starts_with("cbarq_separation_")), na.rm = TRUE),
+         excitability_score = rowMeans(select(manydogs_data_transformed,    #compute average scores of excitability
+                                 starts_with("cbarq_excitability_")), na.rm = TRUE),
+         attachment_score= rowMeans(select(manydogs_data_transformed,     #compute average scores of attachment
+                              starts_with("cbarq_attachment_")), na.rm = TRUE),
+         miscellaneous_score= rowMeans(select(manydogs_data_transformed,    #compute average scores of miscellaneous behavior issues
+                                 starts_with("cbarq_miscellaneous_")), na.rm = TRUE),
+         ostensive = rowMeans(select(manydogs_data_transformed, 
+                                     starts_with("ostensive_")), na.rm = TRUE), #create proportion correct on ostensive task
+         ostensive_binary = ifelse(ostensive <= 0.5, 0, 1), #create column that notes if a dog performed over or under chance at the ostensive task
+         nonostensive = rowMeans(select(manydogs_data_transformed,
+                                        starts_with("nonostensive_")), na.rm = TRUE), #create proportion correct on nonostensive task
+         nonostensive_binary = ifelse(nonostensive <= 0.5, 0, 1),   #create column that notes if a dog performed over or under chance at the nonostensive task
+         os_best = ifelse(nonostensive > ostensive, 1, 0)) |>   #create column that notes if the dog was better at the nonostensive task
+  select(c(sex,age,gaze_follow,num_household_dogs:environment,training_score:os_best))#grab the columns we will be using for the analysis in this tutorial
+
+```
+
+## Two Model Assumptions to Rule Them All: Handling N>P and Missing Data
+
+While all models rely on specific assumptions to find patterns in data, there are two key assumptions that are generally applicable across most models. The first assumption is that the number of observations is greater than the number of predictors. The second assumption is that there is no missing data. Unfortunately, in practicality missing data is almost always present. Therefore, when you have missing data it must be transformed either by removal or imputation (a fancy word for filling in the missing values with a placeholder value like mean, median, or mode). Let's figure out how to deal with them.
+
+### The N>P Problem AKA Dimensionality? {#np}
+
+One underlying assumption across all of machine learning is that you have more observations (n) than you have predictors (p), n>p. This problem is also sometimes refereed to as dimensionality. High dimensionality is the same thing as making sure you don't have n < p. The number of observations must be large than the number of predictors because analytic models do a bad job of parsing out what predictors are important if they don't have multiple observations per predicting factor. If you have fewer observations than predictors (n<p), your models may still run without error, but the outputs given will often not be meaningful or predictive. These models overfit the training data and are poor at predicting new data.
+
+For most problems in psychology with small datasets (n < 1000), you need to make sure that you have more observations (n) than you have predictors. For instance, in the dataset we are working with today, there are `r nrow(manydogs_feature_selection)` observations and `r ncol(manydogs_feature_selection)` predictors. We know this because our data is tidy so each row is an observation and each column is a predictor, with tidy data all I need to look at to see if n>p is true is whether there are more rows than columns. `r nrow(manydogs_feature_selection)` is larger than `r ncol(manydogs_feature_selection)` (phew!) so we do not need to worry about decreasing the number of predictors to make it satisfy this condition.
+
+However, even some cases where there are more predictors than observations (n < p) can be managed with fancier algorithms and hyperparameters that need more time and computing power - but that is outside the scope of this tutorial. In psychology, researchers using neuroimaging often have to deal with n < p, as the number of voxels or regions of the brain being measured is much more than the number of subjects for which they can collect imaging data. One way of dealing with this is to do feature selection via regularization to reduce the number of possible predictors. See [here](https://machinelearningmastery.com/how-to-handle-big-p-little-n-p-n-in-machine-learning/) to read more about how to deal with datasets with more predictors than observations. 
+
+### Missing Data
+
+Unfortunately, missing data is a huge issue for machine learning algorithms. Having a high proportion of missing data (anything greater than 10% in any column) can be detrimental to the predictive accuracy of any model, regardless of whether all other assumptions are met. And some models simply cannot run with any missing data.
+
+Fortunately, there are a number of ways that you can deal with missing data. The simplest (but least desirable) way is to simply not use any observations with missing data. This is the least desired solution because the less data you have, the worse algorithms perform at prediction. Taking out an entire observation because of one missing data point limits the amount of data you have, causing the algorithm to perform worse. 
+
+Another way of dealing with missing data is to replace missing values by [imputing](https://medium.com/towards-data-science/working-with-missing-data-in-machine-learning-9c0a430df4ce) them. Imputing is a fancy word for replacing missing values with other values. One way to replace missing values would be to add 0s to everything that was NA. However, this option can be problematic because it could lead to a model with a ton of bias, or a model showing relationships that are not present because of how a lot of zeros skew the data distributions. Another option of imputing data is to replace the NAs with a value that represents a measure of central tendency. With continuous data, you can replace missing values with the mean or median of the column. For normally distributed data, the mean is most representative and can be used. For data with strong outliers and/or a skewed distribution, the median offers a good option. With categorical data, you can replace missing values with the most frequent number found in the column. Another option (which is outside the scope of this tutorial) is fitting a regression or K nearest neighbors model to the data, and filling in the missing values with the value that these models predict would go in the missing slot. There are good resources for using a [KNN model for imputation](https://medium.com/@karthikheyaa/k-nearest-neighbor-knn-imputer-explained-1c56749d0dd7#:~:text=KNN%20Imputer%20is%20a%20machine,fill%20in%20the%20missing%20value.) and a [regression model](https://medium.com/@ninachen_51372/using-regression-imputation-to-fill-in-missing-values-aaa4b5f277b8) for imputation. The most appropriate imputation method needs to be based on the data set. We are now going to walk through several examples to figure out how to find the best way that fits the data.
+
+To check missing data and transform data accordingly, the first step is to visualize how much missing data you have and where it occurs in your data. 
+
+```{r}
+#create vector with how many NAs are in each column in the dataset
+missing_frequency_in_manydogs_data <- colSums(is.na(manydogs_feature_selection))  
+
+#Create a barplot for the values frequency of missing values in the manydogs dataset
+missing_values_barplot <- barplot(missing_frequency_in_manydogs_data,
+                              main = "Number of Missing Values per Column",
+                              ylab = "Number of Missing Values",
+                              las = 2,
+                              cex.names = .6)
+```
+
+You can see in the above table that we have missing values that need to be dealt with in almost all of our columns. The next step in the missing data process is to summarize our columns. We summarize columns for three reasons. The first is to see what percentage of the column is missing to help us decide when we should omit/delete observations, and when to impute missing values. The second reason is to see the central tendencies of each column. This works in tandem with our third reason, namely, to understand the skew of our columns and begin to do exploratory data analysis. 
+
+#### Imputing Continous Missing Data
+
+To calculate and view the mean, median, mode, min, max, and number of NAs per continuous column, we can use the `summary` function. We have 8 columns that are continuous and so we will use the `select` function to grab just those 8 columns.
+
+```{r}
+manydogs_summary <- manydogs_feature_selection |>  #summarize continuous data
+  select(c(age,training_score:miscellaneous_score)) |>  #grab the 8 columns we needed
+  summary()  #Show me a summary of all the columns that I selected
+
+manydogs_summary
+```
+
+Now that we have the number of missing values per column, we will find should find the percentage of missing values per column to see if any of the columns are more than 10% missing values.
+
+```{r}
+# Grab just the continuous predictors
+manydogs_missing <- manydogs_feature_selection |> 
+  select(c(age,training_score:miscellaneous_score))
+
+# Calculate the percentage of missing values for each column
+missing_percent <- colMeans(is.na(manydogs_missing)) * 100
+
+# Print the missing summary
+print(missing_percent)
+
+```
+
+All but the first two columns (age and training score percent) had a missing value percentage of more than 10%, so it is best NOT to simply delete the missing values as that would be a large portion of our data and would greatly negatively impact model performance. If none of the variables (columns) have more than 10% missing data, we could get away with listwise deletion for those few missing values. Instead, we will need to use central tendency values to replace NAs. In order to help us decide if we should replace continuous missing values with the column median or mode, we need to look at a [histogram](#histograms) to investigate if there is strong skew or outliers that could pull the mean too far in one direction. We will do this using `ggplot`
+
+```{r, warning=FALSE, message=FALSE}
+
+# Create a character vector of the column names I want to plot
+columns_to_plot <- c("age", "training_score", "aggression_score", "fear_score", 
+                     "separation_score", "excitability_score", "attachment_score", 
+                     "miscellaneous_score")
+
+# Subset the dataframe to include only the specified columns
+subset_data <- manydogs_feature_selection[, columns_to_plot]
+
+# Convert the data to long format, specifying the variable column
+subset_data_long <- pivot_longer(subset_data, cols = everything(), names_to = "variable", values_to = "value", names_transform = list(variable = as.character))
+
+# Create histograms using facet_wrap
+ggplot(subset_data_long, aes(x = value)) +
+  geom_histogram() +
+  facet_wrap(~ variable, scales = "free_x")
+```
+
+Plots for training_score, attachment_score, excitability_score, and miscellaneous_score are normally distributed with few strong outliers so we will replace missing values with the mean of each column. All other plots are skewed and/or have strong outliers, so we will replace these missing values with the median of the column. 
+
+```{r} 
+#create a data frame that replaces missing data with the column median or mode calculated above in summary tables
+manydogs_missing_cont <- manydogs_feature_selection |> 
+  mutate(age = ifelse(is.na(age), 3.8630, age),  #change NAs in the age column to the median of the age column
+    training_score = ifelse(is.na(training_score), 2.451, training_score),  #change NAs in the training column to the mean of the column
+    aggression_score = ifelse(is.na(aggression_score), 0.30769, aggression_score), #change NAs in aggression column to median of the column
+    fear_score = ifelse(is.na(fear_score), 0.5882, fear_score),  #change NAs in fear column to median of the column
+    separation_score = ifelse(is.na(separation_score), 0.25, separation_score), #change NAs in separation column to the median of the column
+    excitability_score = ifelse(is.na(excitability_score), 2.007, excitability_score), #change NAs in excitability column to mean of the column
+    attachment_score = ifelse(is.na(attachment_score), 2.012, attachment_score), #change NAs in attachment column to mean of the column
+    miscellaneous_score = ifelse(is.na(miscellaneous_score), 0.904, miscellaneous_score) #change NAs in miscellaneous column to mean of the column
+  )
+
+```
+ 
+#### Imputing categorical missing data
+
+Now we have to summarize the categorical columns to assess what frequencies to add in place of the missing data. To see the categories, frequencies, and percent of each category per column, we can use the `tabyl` function from the `janitor` package. We have 9 columns that are categorical, so we will make 1 tabyl per column.
+
+```{r}
+#Create character vector of columns we need tables for
+columns_needed_for_making_tabyls <- c("sex", "desexed", "purebred", "gaze_follow", 
+                         "ostensive_binary", "nonostensive_binary", "os_best")
+
+# Loop through the columns we need tables for and apply the tabyl function
+for (col in columns_needed_for_making_tabyls) {
+  column_values <- manydogs_feature_selection[[col]]
+  cat("Column:", col, "\n")
+  print(tabyl(column_values))
+  cat("\n")
+}
+
+```
+
+Now we will replace NAs with the category with the highest frequency in each column. 
+
+```{r}
+# add highest frequency per column to missing data in the data frame
+manydogs_missing_handled <- manydogs_missing_cont |> 
+  mutate(sex = ifelse(is.na(sex), 1, sex),  #change the NAs in the sex column to 1, the highest frequency in the sex column.
+         desexed = ifelse(is.na(desexed), 1, desexed),
+         purebred = ifelse(is.na(purebred), 1, purebred),
+         gaze_follow = ifelse(is.na(gaze_follow), 3, gaze_follow),
+         ostensive_binary = ifelse(is.na(ostensive_binary), 0, ostensive_binary),
+         nonostensive_binary = ifelse(is.na(nonostensive_binary), 0, nonostensive_binary),
+         os_best = ifelse(is.na(os_best), 1, os_best)) #change all categorical variables to factors
+
+```
+
+Now if you check how many missing values are in each column you will see that it is 0 for each column!
+
+```{r}
+missing_frequency_after_missing_handled <- colSums(is.na(manydogs_missing_handled)) #Add together any time that a column has an NA
+
+missing_frequency_after_missing_handled
+```
+
+## Other Model Assumptions {#assumptions}
+
+  The first step to understanding whether a machine learning model will be interpretable is understanding what underlying assumptions that model violates or complies with. [Assumptions](https://en.wikipedia.org/wiki/Statistical_assumption) are concepts or conditions that a statistical model relies on for effectiveness. Each model relies on different assumptions, and knowing what model assumes what conditions is a key factor in deciding what model to use with your datasets. This is because if your model assumes condition x, but your data violates condition x, then the model outcomes will be less predictive and, in some cases, essentially useless. When assumptions are not met, the model's outputs can be biased, inefficient, or inaccurate, leading to poor performance or incorrect conclusions. Every model has different assumptions that must be checked. For example, a logistic regression model assumes [noncolinearity](#collinearity), independence of observations, and no strong outliers, while a decision tree model doesn't assume independence and gives no assumption of linearity. It is best to look at each model independently when deciding what assumptions should be checked, and which are irrelevant.
+  
+In classification machine learning, most algorithms fall into one of five categories: Logistic regression, K nearest neighbors (KNN), Naive Bayes, Decision trees/Random forest, or Support Vector Machines (SVM). One of the benefits of using machine learning algorithms is you have a wider range of models that can deal with data that are interdependent and not normally distributed than typical statistical models like linear or logistic regression. As you can see in the below table, decision trees/Random forest do not have any underlying assumptions that need to be pre checked before running. Support Vector Machines only assume that you have [scaled your predictor](#featurescaling). K nearest neighbors (KNN) assumes [feature scaling](#featurescaling) and that the data doesn't suffer from high-dimensionality, which is another way of saying as [observations approach the number of predictors](#np). Naive Bayes has the second most constraints on our list, as it assumes both that your predictor variables are independent of each other (which is usually violated) and that any continuous predictor variables are normally distributed. Logistic regression has more limitations than our other algorithms, as it assumes that predictor variables are independent of each other, that there aren't strong outliers, that there is a linear relationship between each predictor and the [log odds](https://towardsdatascience.com/https-towardsdatascience-com-what-and-why-of-log-odds-64ba988bf704#:~:text=Log%20Odds%20is%20nothing%20but,smaller%20to%20those%20in%20favor.), and that predictors are on the same scale. 
+  
+  
+```{r, echo=FALSE}
+
+assumptiontable <- data.frame(
+  Model = c("Logistic Regression", "KNN", "Naive Bayes", "Decision Trees", "Support Vector Machines"),
+  Independence = c("Yes", "No", "Yes", "No", "No"),
+  Normality = c("No", "No", "Yes", "No", "No"),
+  No_Outliers = c("Yes", "No", "No", "No", "No"),
+  Linearity = c("Yes", "No", "No", "No", "No"), 
+  High_Dimensionality = c("No", "Yes", "No", "No", "No"),
+  Feature_Scaling = c("Yes","Yes","No","No","Yes"))
+
+kable(assumptiontable)
+```
+
+The above table lists the model assumptions that need to be understood and investigated further. Make sure you investigate these assumptions per *research question*, as different questions will use different data. If an assumption is violated, you can either transform your data to meet the assumption or eliminate that test from your analyses. Below I will show you how to run checks for independence, normality, strong outliers, linearity, [high dimensionality](#np), and how to [feature scale](#featurescaling) your data.
+
+### Independence
+
+First, we will look at [independence](https://www.bookdown.org/rwnahhas/RMPH/mlr-independence.html#mlr-independence) assumption. This assumes that each observation/subject is in no way influenced by or related to the measurements of other observations/subjects. Instead of checking this assumption with a test, it is best to think carefully though how your data was collected to determine if this has been violated. Some examples of instances where independence is violated include data that are repeated measures, longitudinal, or clustered in some other way. Our data was not independent because the ManyDogs data is nested within place. The ManyDogs data includes 20 different testing sites, so subjects are related to each other based on location. For the purposes of this tutorial, we will not run tests that need the independence assumption to be satisfied; however, if you want to run a test that requires independence, there are multiple ways of transforming data or accounting for independence in a model. One example would be to take the average values of DVs within the site, and then the data could be run using logistic regression; however, this causes a great deal of loss in our data. Another way is to use mixed effect models and include the location or lab as a random effect. However, these are both outside the scope of this tutorial. 
+
+### Normality
+
+The second assumption we have to look at is [Normality](https://www.statisticshowto.com/assumption-of-normality-test/#:~:text=Draw%20a%20boxplot%20of%20your,showing%20data%20that's%20approximately%20normal). Our only test that requires normality is Naive Bayes, which assumes that continuous predictor variables are normally distributed. Normality assumes your data roughly fits a bell shape if mapped as a histogram, with most data close to the middle of the total range and few extreme values. If normality is violated, you should either not run the model that assumes normality, or transform your data to become normally distributed. There are a number of different tests that can check for normality; however, we will use the two most often used that are easily interpretable: Quantile-quantile plot (Q-Q plots) and density plots. Q-Q plots plot a continuous variable along a diagonal line. If the points on the Q-Q plot follow the line representing the normal distribution, then you have a normal distribution. If the points significantly deviate from the plotted line, you do not have a normal distribution. For a density plot, you are looking for a bell shape.
+
+Below is the R code that creates a Q-Q plot and then a density plot for the continuous variable we will use in research questions 1 and 2: training_score. 
+
+```{r}
+qqnorm(manydogs_missing_handled$training_score)
+qqline(manydogs_missing_handled$training_score)
+
+
+plot(density(manydogs_missing_handled$training_score), main = "Density Plot of Training Score")
+```
+
+You can see that the points on the Normal Q-Q Plot fall more on the line than not. If more than 25% of data doesn't fall on the line, then it is unlikely you have normality. The line should also be symmetrical; if you have a curve in the line, you do not have normality. On the density plot, you are looking for no extra bumps on the the tails of the curve: the tails should approach 0 at a fairly constant rate. Note that the smaller the sample, the less descriptive plots can be, so it might be best to check other tests of normality if you aren't sure after checking these plots. Normality tests include the Shapiro-Wilk test or Kolmogorov-Smirnov test. For help getting an intuitive sense of what is sufficiently normal see [here](https://whitlockschluter3e.zoology.ubc.ca/Tutorials%20using%20R/R_tutorial_Normal_and_sample_means.html) for Q-Q plots, and [here](https://statsandr.com/blog/do-my-data-follow-a-normal-distribution-a-note-on-the-most-widely-used-distribution-and-how-to-test-for-normality-in-r/) for density plots. 
+
+The above plots satisfy the normal distribution assumption. Training score is the only continuous variable in research questions 1 and 2, so we are done checking normality for these questions. 
+
+Research question 3, however, has multiple continuous variables so we have to check each of the continuous variables individually. Let's make Q-Q and Density plots for each of the following continuous predictors used in RQ3: age, aggression score, attachment score, excitability score, fear score, miscellaneous score, and separation score. I'll show you the first two, but they all have the same pattern.
+
+```{r}
+#Plots for Age
+age_qqplot <- qqnorm(manydogs_missing_handled$age)
+qqline(manydogs_missing_handled$age)
+age_density <- plot(density(manydogs_missing_handled$age), main = "Density Plot of Age")
+
+#Plots for Aggression
+aggression_qqplot <- qqnorm(manydogs_missing_handled$aggression_score)
+qqline(manydogs_missing_handled$aggression_score)
+aggression_density <- plot(density(manydogs_missing_handled$aggression_score), main = "Density Plot of Aggression")
+
+#Plots for Attachment
+#attachment_qqplot <- qqnorm(manydogs_missing_handled$attachment_score)
+#qqline(manydogs_missing_handled$attachment_score)
+#attachment_density <- plot(density(manydogs_missing_handled$attachment_score), main = "Density Plot of Attachment")
+
+#Plots for Excitability
+#excitability_qqplot <- qqnorm(manydogs_missing_handled$excitability_score)
+#qqline(manydogs_missing_handled$excitability_score)
+#excitability_density <- plot(density(manydogs_missing_handled$excitability_score), main = "Density Plot of Excitability")
+
+#Plots for Fear
+#fear_qqplot <- qqnorm(manydogs_missing_handled$fear_score)
+#qqline(manydogs_missing_handled$fear_score)
+#fear_density <- plot(density(manydogs_missing_handled$fear_score), main = "Density Plot of Fear")
+
+#Plots for Miscellaneous
+#miscellaneous_qqplot <- qqnorm(manydogs_missing_handled$miscellaneous_score)
+#qqline(manydogs_missing_handled$miscellaneous_score)
+#miscellaneous_density <- plot(density(manydogs_missing_handled$miscellaneous_score), main = "Density Plot of Miscellaneous")
+
+#Plots for Separation
+#separation_qqplot <- qqnorm(manydogs_missing_handled$separation_score)
+#qqline(manydogs_missing_handled$separation_score)
+#separation_density <- plot(density(manydogs_missing_handled$separation_score), main = "Density Plot of Separation")
+
+```
+
+Unfortunately, none of the plots for our research question 3 fit the normality assumption. We know this because the density plots do not show a smooth bell curve - there are multiple peaks, instead of just 1 in the center - and graphs aren't symmetrical. For the Q-Q plots, the data has large deviations from the normality line with much more data than 25% not touching the line. There are also deviations on the tail ends, with both tails going off in different directions. Therefore, we do not have normality and cannot run a Naive Bayes model with this data. 
+
+For the purpose of this tutorial, we will conclude this section here. However, there are a number of ways to transform data to try and make continuous predictors conform to normality (i.e. log transformations, square root transformations, and more). Keep in mind as you investigate how to transform your data into a normal distribution that different transformations work better on different kinds of data issues (i.e. skewed data, data with many outliers, etc.). [See here](https://www.datanovia.com/en/lessons/transform-data-to-normal-distribution-in-r/) for a description of different kinds of transformations.
+
+### No Strong Outliers
+
+Our next assumption, no strong [outliers](https://www.analyticsvidhya.com/blog/2021/05/why-you-shouldnt-just-delete-outliers/), is easy to understand but hard to implement, as there is no clear rule as to when to keep and when to delete outliers. The longer you work with data, the better your decisions for this and other questions become - but until that time, there are a few general rules you can follow. If you are working with thousands of data points with low [dimensionality](#np), deleting outliers is easier because you will have more data on which to base the decision on what is an outlier not worth investigating, and what is simply a trend with few respondents on a specific range of values.
+
+But if you have a small amount of data (n<1000) like we do in this tutorial, it is best not to delete any observations. One exception to this rule is if you know for a fact a specific data point is incorrect or impossible, then it is okay to delete. For example, if a participant writes that they are 230 years old, you can be certain this was either a typo or error inputting the data, or they are a vampire and their responses should not be used to predict human behavior. 
+
+There are multiple ways to determine what is an outlier in your data. I am going to show you the one that is most widely applicable and easily understandable, the Interquartile Range (IQR) method.  In this method, an outlier is considered a point that is above the 75^th^ percentile or below the 25^th^ percentile by a factor of 1.5 times the IQR. So, to calculate what points are outliers, it is as simple as making a boxplot. It is best to look at each of your predictor's boxplots to investigate if the points you think are outliers are actually reasonable responses to the questions that just happen to be slightly out of bounds of the IQR, rather than incorrect or problematic data.
+
+```{r}
+#Create a boxplot for age
+age_boxplot <- boxplot(manydogs_missing_handled$age)
+
+#Pull out the values of the outliers 
+age_boxplot$out
+```
+
+Here you can see a visual representation of the data and what is calculated to be an outlier. The argument `$out` allows you to extract from the boxplot object a vector listing all the outliers. Here we see two extreme values are present, but the presence of these values alone doesn't indicate anything is wrong, just that two points are slightly outside of the IQR. It is possible for a dog to be 20 years old, so this point is outside the IQR but not problematic.
+
+Feel free to make boxplots for other variables in the data; however, I have looked through all the outliers and didn't find anything suspicious or incorrectly inputted, so for the rest of this tutorial we will leave the other extreme values alone. For non-tutorial based projects a good rule of thumb is to have at least two or possibly three people look at and discuss which outliers to keep or delete based on best practices for your discipline.
+
+If you want to delete the outliers, you can simply delete the observations listed in the `$out` vector. 
+
+One last note on outliers: The Z-score method is also used to detect outliers. However, Z scoring can introduce problems as it is calculated using the mean and standard deviation. If your data are skewed (which is often the case when we are considering data with outliers), Z-scoring ends up being overly liberal with defining what constitutes an outlier. The IQR is less sensitive than Z-scoring, which has the effect of erring on the side of keeping rather than getting rid of outliers. Again, you only want to get rid of values that are the result of measurement error, data entry error, or has unusual properties that show that that point is not part of the study population. See [here](https://statisticsbyjim.com/basics/remove-outliers/) for more information on when to keep or take out outliers.
+
+### Linearity
+
+Linearity is our next assumption. [Linearity](https://www.bookdown.org/rwnahhas/RMPH/mlr-linearity.html) assumes that *each* predictor in the model, when holding all the other predictors in the model constant, will change in a linear way with the outcome variable. (In other words, don't put a line through something that is not a line). Unlike in linear regression, in logistic regression, we are looking at the log odds of the **probability** of the outcome (i.e., being in a particular category). To diagnose if this is true or not, we need to make a graph of this relationship and see if the plot satisfies the assumption. These plots are called a component plus resistance or CR plot, which can be made with the `crPlots` function in the `car` package. 
+
+We will make a plot for each continuous predictor per research question. We will break code into three sections, one for each research question. You do not need to check the categorical predictors as they are always linear. To read more about why this is see [here](https://www.bookdown.org/rwnahhas/RMPH/mlr-linearity.html). 
+
+```{r, message=FALSE, warning=FALSE }
+
+#Basic logistic regression model with training_score predictor variable and outcome variable of whether the dog did above chance on the ostensive task
+model_RQ_1 <- glm(ostensive_binary ~ training_score, data = manydogs_missing_handled, family = binomial)
+
+crPlots(model_RQ_1, terms = ~training_score,
+             pch=20, col="gray",
+             smooth = list(smoother=car::gamLine))
+```
+
+The dashed line on a CR plot is the relationship between the continuous predictor and the outcome variable, assuming linearity. The solid pink line represents the actual observed relationship in the data. If these two are very different, then the linearity assumption has been violated. If the two lines look similar, then linearity has been confirmed. As you can see in this plot, we do not have overlap between the two lines, so we have a deviation from linearity. When you do not have linearity you have two possible options: 1) do not run analyses that need a linear relationship in data (i.e., what we will do in this tutorial) or 2) transform the data to make it more linear. However, this isn't possible with all data and you will have to transform and then recheck the assumption. See [here](https://stattrek.com/regression/linear-transformation#:~:text=When%20a%20residual%20plot%20reveals,more%20effectively%20with%20nonlinear%20data.) for resources on how to transform nonlinear data into linear data.
+
+Now let's check linearity for question 2.
+ 
+```{r}
+#Make basic logistic regression model with training_score predictor variable and outcome variable of whether the dog did above chance on the nonostensive task
+model_RQ_2 <- glm(nonostensive_binary ~ training_score, data = manydogs_missing_handled, family = binomial)
+
+crPlots(model_RQ_2, terms = ~training_score,
+             pch=20, col="gray",
+             smooth = list(smoother=car::gamLine))
+```
+
+Similarly, in the data for research question 2, we do not have overlap between the two lines, so we have a deviation from linearity. 
+
+Finally, for the more complicated third research question, we have more than one predictor that is continuous, so we have to make a CR plot for each predictor variable in the model holding all others variables fixed (i.e., with the same values). 
+
+```{r}
+#Make basic logistic regression model with all predictors and outcome variable that measures whether the dog did better at the nonostensive task
+
+model_RQ_3 <- glm(os_best ~ age + sex + desexed + purebred + gaze_follow + training_score + aggression_score + fear_score + separation_score + excitability_score + attachment_score + miscellaneous_score, data = manydogs_missing_handled, family = binomial)
+
+age_crplot <- crPlots(model_RQ_3, terms = ~age,
+             pch=20, col="gray",
+             smooth = list(smoother=car::gamLine))
+
+#training_crplot <- crPlots(model_RQ_3, terms = ~training_score,
+            #pch=20, col="gray",
+            #smooth = list(smoother=car::gamLine))
+
+#aggression_crplot <- crPlots(model_RQ_3, terms = ~aggression_score,
+             #pch=20, col="gray",
+             #smooth = list(smoother=car::gamLine))
+
+#fear_crplot <- crPlots(model_RQ_3, terms = ~fear_score,
+             #pch=20, col="gray",
+             #smooth = list(smoother=car::gamLine))
+
+#separation_crplot <- crPlots(model_RQ_3, terms = ~separation_score,
+             #pch=20, col="gray",
+             #smooth = list(smoother=car::gamLine))
+
+#excitability_crplot <- crPlots(model_RQ_3, terms = ~excitability_score,
+             #pch=20, col="gray",
+             #smooth = list(smoother=car::gamLine))
+
+#attachment_crplot <- crPlots(model_RQ_3, terms = ~attachment_score,
+             #pch=20, col="gray",
+             #smooth = list(smoother=car::gamLine))
+
+#miscellaneous_crplot <- crPlots(model_RQ_3, terms = ~miscellaneous_score,
+             #pch=20, col="gray",
+             #smooth = list(smoother=car::gamLine))
+
+```
+
+All eight of the plots we made for the continuous variables show near identical overlap between the two lines. Therefore, we have linearity between predictors and the log odds of the outcome variable and can move on to our next assumption! To save space and to make this tutorial less messy, I have only outputted one of the eight plots you need to check. However, when you are working through this tutorial, please look at all the plots to check this assumption.
+
+### Feature Scaling {#featurescaling}
+
+Feature scaling or normalization is sometimes misinterpreted as needing to transform predictors to be normally distributed, which we already went over in the normality section of assumption checks. Instead, [feature scaling](https://medium.com/@punya8147_26846/understanding-feature-scaling-in-machine-learning-fe2ea8933b66#:~:text=Introduction%20to%20Feature%20Scaling,are%20on%20a%20similar%20scale.) is the process of transforming data to ensure that all the predictors in the model are being analyzed on the same scale. Feature scaling allows you to accurately compare two predictors that have different magnitudes. For instance, if you have a data set looking at what ages and income levels are associated with middle class status (binary category), certain algorithms will misclassify data points simply because the larger range on the scale of income will artificially inflate the difference between age/income and middle-class status. Feature scaling also helps algorithms converge faster and takes less processing power.
+
+Now that you know why we transform predictors by scaling them, let's scale our continuous predictors. There are several ways to transform predictors that all do slightly different things to the data, but for now we will transform our data with the most commonly used transformation: z-scores. Z-scores transform a column of values into a new variable with a mean of 0 and standard deviation of 1 by subtracting the original value by the mean of the column, and dividing that new number by the standard deviation. This process makes the range and magnitude of our columns easily comparable so outcomes are more reliable and interpretable. (Note: this is different from the Z-score outlier detection we discussed above - here, Z scores are our friends!)
+
+To see explanations of other types of transformations see this great [guide](https://rpubs.com/zubairishaq9/how-to-normalize-data-r-my-data) on R pubs. 
+
+We will use the function `scale` to apply the z-score function to our continuous predictor columns. This function comes with base R, so no need to install another package. 
+
+```{r}
+manydogs_transformed <- manydogs_missing_handled %>%
+  mutate_at(vars(age, training_score, aggression_score, fear_score, separation_score, excitability_score, attachment_score, miscellaneous_score), scale)
+```
+
+Now we can use this dataset for the rest of our analyses!
+
+### Algorithms to Run Based on Assumption Checks
+
+Now that we know what assumptions were violated and which were true of our data, we need to look at which models will perform well on each of the three research questions. Let's review the table we made above for each of the assumption checks we did. A "No" means that there was no issue with this model assumption (the assumption was satisfied), while a "Yes" means that there was an issue with the model assumption (the assumption was violated). Take a moment to refresh on each section: where were there problems with each assumption?
+
+```{r, echo=FALSE}
+assumptiontable2 <- data.frame(
+  Model = c("Research Question 1", "Research Question 2", "Research Question 3"),
+  Independence = c("Yes", "Yes", "Yes"),
+  Normality = c("No", "No", "Yes"),
+  No_Outliers = c("No", "No", "No"),
+  Linearity = c("Yes", "Yes", "No"), 
+  High_Dimensionality = c("No", "No", "No"),
+  Feature_Scaling = c("No", "No", "No"))
+
+kable(assumptiontable2)
+```
+
+As you can see, we had issues with independence across all three of our research questions. Because our observations are grouped and dependent on each other, we should eliminate the two models where this assumption must be met: Naive Bayes and Logistic Regression. We also had issues with normality in the data to be used for our third research question. This would eliminate Naive Bayes from the possible models for the third question, but since we already eliminated this model, its violation of that assumption does not change our decision. There were no issues with feature scaling, high dimensionality, linearity, or strong outliers. 
+
+To hear more about choosing a model see step [4A](#4a) below.
+
+Now that I told you all about assumption checks and how important they are, I'll let you in on a dirty little secret: if all you care about is predicting what category a subject belongs to and nothing about interpretability (and you are running multiple models), it doesn't really matter if the assumptions are met. 🤯 This is because models whose assumptions are not met will perform worse than models that do meet assumptions, though in some cases, the violations may be minor enough to not significantly affect prediction accuracy. However, it is never a good idea to run algorithms without understanding your data and the relationships within your data. In research especially, we are rarely concerned only with prediction. If you want to understand the real-world phenomena the model is approximating and/or why a particular subject is in a specific category, you need interpretability. Furthermore, running models is time consuming and computationally expensive, and it is best practice to go through all the pre-processing steps before running a model to save resources. The only time you can run models without checking assumptions is when you want an input/output machine that will tell you what category something belongs based solely on features.
+
+## Regularization AKA how to fix overfitting and collinearity {#regularization}
+
+Now, if you were to consult other machine learning texts, you will notice one word that often comes up... regularization. Regularization only applies to linear models because it is predicated on changing the slope of a fitted line to reduce overfitting issues. For our purposes, we will not be able to use regularization in this tutorial. This is because linear regression is not a classification based model, the assumptions weren't met for logistic regression, and tuning regularization with support vector machines is outside the scope of this tutorial. If you have no interest in regularization you can skip this section. I’ve included this section in the tutorial because it’s a key concept in machine learning, commonly applied whenever linear or logistic regression is used.
+
+Regularization helps us to solve two problems that plague statistics: collinearity and overfitting. Often after you collect your data, you will find that some of your predictors are [colinear](https://www.stratascratch.com/blog/a-beginner-s-guide-to-collinearity-what-it-is-and-how-it-affects-our-regression-model/), meaning that two or more of your predictor variables are highly correlated with each other. [Overfitting](https://www.geeksforgeeks.org/underfitting-and-overfitting-in-machine-learning/) means that your model too closely maps onto your training data and isn't flexible enough to do well or make accurate predictions for new unseen data. All data represents two sources of variation: the true relationships, and the error in your sample (i.e., what is true of your sample but is not true of the population). The smaller your sample size, the more likely it is that you have captured noise rather than the true relationship between variables. The graphic below helps illustrate how overfitting creates a model reliant on error rather than the true relationship.  ![overfitting](https://www.mathworks.com/discovery/overfitting/_jcr_content/mainParsys/image.adapt.full.medium.svg/1705396624275.svg)
+
+You can solve both of these issues at once with something called regularization. Regularization simply adds a penalty term, lambda, to the slope of the fitted line. This additional value added to the slope adds in a little bit of error to the model. This user-added error is a necessary evil to combat some of the noise that occur in models when the data used to construct the model is not totally representative of the underlying truth of the relationship between variables. The choice to regularize is totally up to you, and is based on how much risk tolerance or uncertainty you want to include in your model outcomes. If you have millions of data points from a highly representative sample, adding in that extra error will probably get you further from the truth of the relationship. If you have, like we do in this example, less than 1000 subjects and are trying to generalize to the species level you probably should do regularization as the sample is small and not totally representative of your total population.
+
+There are three types of regularization that are commonly used: 
+
+1. Lasso Regularization - best to use if you know some of the predictors in your model are useless
+2. Ridge Regularization - best to use if you know all of the predictors in your model are useful
+3. Elastic Net Regularization - best to use if you don't know how useful/useless your predictors are because it has the best of both worlds ([Chill it out take it slow than you'll rock out the show](https://www.youtube.com/watch?v=uVjRe8QXFHY)) - it does the math from lasso + math from ridge to get a new number that is called elastic net.
+
+In each case, our algorithm creates a value that adds together the loss/cost function, a lambda value, and  then multiples this number by a transformation of the beta weights. How the beta weights are transformed is where the three types differ. If you got a little lost in that last sentence, don't despair; we will describe each of the three parts that contribute to regularization in detail. I'll clarify this concept using an example you are likely familiar with, linear regression. 
+
+In a linear regression model, our loss/cost function is the sum of squared residuals. The sum of squared residuals (calculated by adding together all the squared values of the differences between each data point and the estimate of where the line says the data point should be) is a value that represents how well the line did at predicting actual values. 
+
+The second term, Lambda, can be any positive number. The larger the lambda, the larger the penalty or error you are adding to the model. The lambda is calculated by iteratively going thru various values of lambda until you find one that minimizes the regularization value. 
+
+The difference between the three types of regularization occur in the third term, which represents how they transform the beta weights of each variable. In Lasso regularization, you multiply by the absolute value of the beta weights (i.e., |slope|). In Ridge regularization you multiply by the squared beta weights (i.e., slope^2^). In elastic net, you multiply by adding together both penalties (i.e., |slope| + slope^2^).
+
+You use Ridge regularization when you believe all your variables are useful, and Lasso when you suspect some are not, due to the difference between squaring values in Ridge and using absolute values in Lasso. Essentially, it is possible to set a predictor to exactly 0 when you take the absolute value, but when you square a term it can only ever get very small but never exactly 0. Because of this, Lasso and Elastic Net regularization can set some predictor beta weights to exactly 0, eliminating those predictors from the model. On the other hand, Ridge will always have a beta weight value for each predictor. The smaller the beta weight for Ridge regularization the less predictive an individual predictor will be to the model. In this way Lasso and Elastic net regularization allows you to have math take out useless predictors instead of doing it in some semi-arbitrary way (NICE!).
+
+Two really important limitations of regularization are:
+
+1. When working with collinear variables, the way the math works behind the scenes, Lasso and Elastic Net will always set the first collinear variable to 0 and keep the second variable, so be mindful of this when you order the model variables. In practical terms, this means that you should enter terms into the model in order of importance based on domain knowledge. 
+2. These regularization techniques only works with models where the relationship between predictors and the outcome is linear, or the model parameters are linear. Of the methods mentioned in this tutorial, the only algorithms that regularization works are linear regression, logistic regression, and support vector machines.
+
+For our purposes, we will not be able to use regularization in this tutorial. This is because linear regression is not a classification based model, the assumptions weren't met for logistic regression, and tuning regularization with support vector machines is outside the scope of this tutorial. However, if we were to run regularization for these questions, we would choose ridge regularization for research questions 1 and 2, as there is only one predictor variable (meaning it would need to be predictive for there to be a model!). For research question 3, where we are interested in which predictor variables out of many are important, we would use Elastic Net regularization because we want the algorithm to help us decide which predictors to use in the model.
+
+colinearity: bascially reducse the btea to 0 removing it from the model thus eliminating the possitivbility or colinearity to occur but it did that without having to choose it did it with iteratize learning. 
+
+for example, we have a model with two useful predictors nad one useless predictor and because of this we will use lasso regularization which would take this useles predictorand multiple x by the beta weights
+
+
+# Step 2: Set Randomization and Cross Validation
+
+In this step, we will perform a basic cross validation and set our randomization component. Cross validation occurs when you partition the data into sections or parts. To begin, we must partition that data into two parts: a training and a testing set. You want to fit your models on the training data, and then use the testing data to assess how well the model can predict categories based on new (unseen) data. If you skip this step, you will run into an issue known as data leakage. [Data leakage](https://machinelearningmastery.com/data-leakage-machine-learning/) occurs when data from outside the training data is used to build a predictive model. If you were to build the model on all the data and then use a subsection of that to test it, the results you get would not reflect how well that model would predict newly collected data. That model would be too reliant on the specific data you have instead of the truth of the relationship between the variables in the real world, also known as [overfitting](#overfitting). 
+
+```{r}
+set.seed(1234567) # ensures randomized outputs are reproducible
+
+train_indices <- sample(1:nrow(manydogs_transformed), 0.8 * nrow(manydogs_transformed)) #Grabs a random subset of the data. In this case we asked for 80% of the data to be sampled which is the standard
+training_data <- manydogs_transformed[train_indices, ] #Grab the 80% of the data you just pulled out and call it training
+testing_data <- manydogs_transformed[-train_indices, ] # Grab the other 20% not in the train indices and call it testing
+
+```
+
+# Step 3: Repeated Cross Validation {#crossval}
+
+Repeated cross validation is a little like data Russian nesting dolls. It is also simpler than most people expect it to be. Repeated cross validation simply refers to the concept of breaking your data into smaller sections to get an average of how well a model does on different subsets of the data. That way you have an average value for whatever you are interested in - whether than be your loss/cost function or predictive accuracy. An average allows a more accurate estimate for outcomes than relying on one partition of the data alone. If you only cut the data once, there is a likelihood that the training partition you randomly selected could have a disproportionately high number of outliers, or didn't have a good distribution of observation values. Cross validation is a way of making the randomization component of training a dataset less subject to chance.
+
+```{r, echo=FALSE}
+knitr::include_graphics("nesting_dolls.png")
+```
+
+The three main types of cross validation are k-fold, leave one out, and nested cross validation. You use them in the following instances: 
+
+  + [Leave one out cross validation (LOOCV)](#loocv) - best to use when your dataset is very small (n ~ 500). 
+  + [K-fold](#kfold) cross validation - usually best to use when your dataset is large (n > 1000). The K stands for any number you would like, usually 10-fold cross validation. K stands for how many times you would like the data to be partitioned.
+  + [Nested cross validation](#nested) - best to use when you need to tune [hyperparameters](#hyperparameters) like k in KNN models or lambda in regularization techniques.
+  
+The value of 1000 observations as a small cutoff isn't a universal standard. Instead, what constitutes large or small means different things to different people depending on the field, the type of model you are running, and if you need to tune hyperparameters. Yes, this is a vague answer for what is small and what is large. It's also the most accurate answer. But, to help you out: In psychology, most experiments not involving neuroimaging data from large consortiums or genome-wide association studies are usually considered "small" in the data science world. Large language learning models can have billions of observations.
+  
+Now, let's break down these three types of cross validation to explain them further! All three cross validation options simply cut the data you are working on into small chunks. Depending on which cross validation technique you choose, they will complete slightly different cuts (partitions) to subdivide the data. 
+
+[Leave one out cross validation](#loocv) iteratively runs as many models as you have observations using all but one observation each time to train the model and then uses the one observation it left out to test the model. It does this until every observation has been used as the testing data. This is best for very small datasets (n < 1000), because when you get up to the thousands of observations the computing power required gets prohibitively expensive and time consuming. 
+
+[K-fold cross validation](#kfold) cuts the data into k sections with k being any positive integer you like. The smallest value k can be is 2, and the largest option being the number of observations. If your k is the number of observations, you have reinvented Leave one out cross validation! (Fun, right?) Once the data is broken into k sections it then runs as many models as the number k iteratively until all folds have been used as the validation/testing set. 
+
+[Nested cross validation](#nested) runs two different cross validations with one within the other (like our nesting dolls!). The outer loop of a nested cross validation runs exactly like a k fold cross validation. The inner fold also runs exactly like a k fold cross validation, but instead of running on the entire data set but leaving 1 fold out, it runs on each fold of the outer loop's training set. Each loop run in the inner loop uses a different set of hyperparameters, like choosing what value of lambda to use in regularization or what k to use in a KNN model. When the inner loop concludes it can tell you what the optimal hyperparameter is based on which value gives the lowest loss/cost function. The outerloop then runs using the chosen [hyperparameter](#hyperparameter) to return the best performing model given your data. 
+
+There are a few other types of cross validation, but they are all variations on cutting things into parts and running small data sections through the model. The more computing power and time you have access to, the fancier you can make your cross-validation procedure. I won't go into detail on some of the more complicated cross validation practices as the fancier ones do best on very large datasets in the millions where all the cutting/partitioning can still be meaningful. If your data, like in this tutorial's example, has less than 1000 observations, it is less likely that increasing the complexity of your cross validation would be meaningful, helpful, or worth the time and computing power. 
+
+For our purposes in this tutorial, our training data set only has `r nrow(training_data)` observations (which is considered small in machine learning), so we will be using leave one out cross validation (LOOCV). LOOCV is not the only or "perfect" method to use with this or your dataset. There is more than one way to skin a cat and many ways to partition a dataset.
+
+There are multiple ways in R to create code to run a cross validation. We will use the `makeResampleDesc()` function from the `mlr` package to define what cross validation procedure you are completing. The `mlr` (machine learning in R) package came out in 2016 and includes a suite of tools to create machine learning models quickly and efficiently in R. This package is the main package we will be using in this tutorial. All three questions we are investigating use the same size dataset, so we will use LOOCV for all three. I have also shown you in a comment how you would define a 10 fold cross validation, as that is the most often used cross validation method. In the comment below this is repeated 10 times with the `reps` argument resulting in the model being ran a hundred times.
+
+```{r, echo=TRUE}
+
+loocv <- makeResampleDesc(method = "LOO") #define parameters for cross validation
+
+#10fold_cross_validation <- makeResampleDesc(method = "RepCV", folds = 10, reps = 10, stratify = TRUE) #If you want a different number of folds you can change the number to anything you like. If your number of folds is the same number as your observations than you have remade LOOCV!
+```
+
+Above is the only code you need for now. When you run your model, you will set the `resampling` argument to `loocv`. We will add `loocv` to our models when we actually run the model, but to show you what it will look like, here is some dummy code:
+
+```{r}
+
+#model <- resample(learner = knn, task = data, resampling = loocv)
+
+```
+
+# Step 4: Choosing Algorithms & Running Models {#4a}
+
+## Choosing an Algorithm
+
+Throughout this tutorial so far, I have introduced you to 5 main model types: Logistic regression, K nearest neighbors, Naive Bayes, Decision trees/Random forest, and Support vector machines. Let's go through a brief description of what each model does some of the pros and cons of each, as well as what type of predictor and outcome variables each can handle. (I do not plan to explain each algorithm to such depth that you understand the math. That is beyond the scope of this tutorial but there is a linked video describing each algorithm type in detail which gives you an amazing starting point.)
+
+1. [Logistic Regression](https://www.youtube.com/watch?v=yIYKR4sgzI8){#logisticregression} - Logistic regression fits a S shaped squiggle to data. 
++ Pros: it is easily interpretable, and it doesn't assume normally distributed data. 
++ Cons: It won't work if there is complete separation between the two classes (i.e., if there is no overlap on the graph). But it also won't work if there is near total overlap.
++ Outcome variable type: Takes only binary categorical outcome variables
++ Predictor variable type: Takes both categorical and continuous predictor variables
+2. [K nearest neighbors](https://www.youtube.com/watch?v=HVXime0nQeI){#knn}(KNN) - KNN algorithms assign unknown data to a category based on what category its neighbors are listed as. For example, if you specify that k is 3, it will look at the classifications of the three closest points to the new data and tell you that your new data is the category that is the average value of the three points. If all three points belong to one category, your new point belongs to that category. If two points belong to one category it will also tell you that your new value belongs to that category. 
++ Pros: Simple to understand, makes no assumptions about data
++ Cons: Can get very computationally expensive to run if you have large datasets; accuracy is significantly impacted by noisy data and outliers; in high-dimensional datasets it performs badly; and categorical data needs to be recoded into numerical to run.
++ Outcome variable type: Takes only categorical outcome variables
++ Predictor variable type: Takes both categorical and continuous predictor variables
+3. [Naive Bayes](https://www.youtube.com/watch?v=O2L2Uv9pdDA&t=228s){#naivebayes} - Multiples the probabilities of each feature being found in a particular dataset. For example, if the probability of a dog being 2 years old is 6/10 for the correct choice and 2/10 for the incorrect choice, those probabilities are multiplied with all other probabilities for each variable, and the category with the higher value per observation tells the computer which bin to classify the observation in.
++ Pros: Doesn't need to be tuned for hyperparameters; computationally inexpensive; can handle minimal amount of missing data if need be (good rule of thumb is less than 5% per column); works best on classifying based on words
++ Cons: Assumes predictor variables are normally distributed; assumes predictors are independent and suffers a lot when they aren't
++ Outcome variable type: Takes only categorical outcome variables
++ Predictor variable type: Takes both categorical and continuous predictor variables
+4. [Decision Tress/Random forest](https://www.youtube.com/watch?v=_L39rN6gz7Y)}{#decisiontrees} - A decision tree is a flow chart made by the algorithm that follows a line of logic to its conclusion. You start at the **root** and you go down a branch based on a feature of the data (i.e. high or low score on training) until you reach a **leaf** (bin) that has your final guess for which category a new datapoint should belong to. **Node's** are any point between the start of the tree and a leaf where the algorithm makes a decision to move from branch to branch to leaf. Each node (decision point) partitions predictors based on values that best categorize outcome variables.
++ Pros: Flexible; easily interpretable; no assumptions; more robust to missing data than most other algorithms (good rule of thumb is no more than 10% per column though as predictive accuracy gets worse the more missingness you have); good with outliers. Running multiple decesion trees on different subsections of the data and averaging prediction outcomes is called a random forest. This is easy to remember as many trees creates a forest.
++ Cons: Individual trees WILL most likely overfit data, so they are rarely used. Instead, I have grouped decision trees with how they are most often used: in a random forest.
++ Outcome variable type: Takes both categorical and continuous outcome variables
++ Predictor variable type: Takes both categorical and continuous predictor variables; for random forest you need many predictors to make the forest necessary.
+5. [Support Vector Machines](https://www.youtube.com/watch?v=efR1C6CvhmE){#svm} - Fits the best line possible to data that separates the categories. However, unlike linear or logistic regression it checks all kinds of lines whether that be linear (regular line), polynomial (curved line), sigmoid (S shape), or radial (circle).
++ Pros: Doesn't assume independence in predictors so can be used if you have collinearity or interdependence; performs well on a wide variety of tasks; makes very few assumptions; often works very well on complex nonlinear data structures
++ Cons: **Very** computationally and time intensive to train, has many hyperparameters that all have to be tuned
++ Outcome variable type: Can be used for both categorical and continuous outcomes but mostly used for categorical
++ Predictor variable type: Only takes continuous predictors
+
+## Assessing Algorithms Based on Satisfied Assumptions
+
+Now that we know what [assumptions](#assumptions) are met and how each model deals with data, we can now decide what models to run with each of our three research questions.
+
+As a reminder our research questions are:
+1. Does the amount of training a dog has completed predict whether a dog will perform under or over chance on the ostensive behavioral task?
+2. Does the amount of training a dog has completed predict whether a dog will perform under or over chance on the nonostensive behavioral task?
+3. Which dog characteristics predict whether a dog is more likely to perform better at the nonostensive than ostensive behavioral task? 
+
+```{r, echo=FALSE}
+models_to_run <- data.frame(
+  Question = c("Research Question 1", "Research Question 2", "Research Question 3"),
+  Logistic = c("Do Not Run", "Do Not Run", "Do Not Run"),
+  KNN = c("Run", "Run", "Run"),
+  Naive_bayes = c("Do Not Run", "Do Not Run", "Do Not Run"),
+  Decision_trees = c("Run Decision Tree", "Run Decision Tree", "Run Random Forest"), 
+  Support_Vector_Machines = c("Run", "Run", "Do Not Run"))
+
+kable(models_to_run)
+```
+
+We will not run logistic regression because even though our predictors and outcomes work with the model, we have violated independence and linearity (linearity was only violated for question 1 & 2 but not 3). Independence could be corrected by adding a grouping structure for lab/location but that is outside the scope of the current tutorial. Linearity could be fixed with transformations, similar to normality violations. It is best practice to start fixing the issue with the biggest problem, then recheck all of your assumptions. Do not fix multiple problems without first seeing how each individual change effects data attributes.
+
+KNN models can be run for all of the research question because the assumptions are met and the predictors and outcome variables match what a KNN model needs. 
+
+Naive Bayes will not be run for any of the models because the independence assumption is violated and cannot be easily worked around by transforming variables or taking into account grouping structure. Furthermore, the normality assumption of the continuous predictor variables is violated for research question 3.
+
+Random forest models could be run in theory for all the questions, because the assumptions are met and the predictors and outcome variables match what the model needs. However, running a random forest with only one continuous predictor is a waste of computational power as it won't give you anything meaningful with so little data. (Remember, random forest models are built by making a large number of individual trees and averaging the results). You could run just one decision tree, which is what we will do below. Running an entire random forest model with one predictor is sort of like using a sharpened chefs knife to saw a piece of wood in half- it'll get the job done but it'll take forever and you've wasted a very good knife.
+
+Support vector machines will be run for research questions 1 and 2, but not 3. The assumptions are met but, SVM can only handle continuous predictor variables. We have a number of variables we believe to be important that are categorical in nature, so we will not run a SVM model for research question 3.
+
+## Running your models
+
+Now after all that explanation we finally get to the good part, running the actual models!
+
+In 2016 a package came out called `mlr` (machine learning in R) that created a suite of tools to create machine learning models quickly and efficiently in R. This package is the only R package we will need for this section of the tutorial. The `mlr` package breaks creating machine learning models into three smaller steps: 
+
+1. Define the [task]{#task}: This step consists of passing the data into an object and labeling what the outcome variable is.
+2. Define the [learner]{#learner}/model: A learner defines the structure of the algorithm. In this step you define/list the model type you want to use (i.e., logistic regression, KNN, random forest, etc.) and then the specific [hyperparameters](#hyperparameters) you want the model to use. (i.e., what k to use in a KNN model) Learner is not a general term used throughout machine learning but instead is specific to the `mlr` package. You can also think of this step as defining your model.
+3. [Train]{#train} the model with the appropriate cross validation approach: Put it all together along with the specified cross validation approach. At this step you create an object that takes the task, learner, and any other additional features and uses that information to output the trained model you can use to make predictions.
+
+### Creating the Task
+
+To define the [task](#task) we will use the `makeClassifTask()` which defines a classification task. If doing regression tasks, you would use the function `makeRegrTask()`. You then pass the data to the `data` argument, and the name of the predictor variables to the `target` argument. For our purposes, we will be defining three tasks because we have three research questions, each with slightly different data representing the different outcomes and predictors. Because we only want to pass the data that is absolutely necessary for each task, we have to make those data frames before we can use them in to create the Task.
+
+```{r, warning=FALSE}
+#Research Question #1
+#extract only the two columns from the large pre-processed training dataset we made in step 1 that are needed for the research question: training score and the ostensive binary outcome variable
+data_RQ_1 <- training_data |>  
+  select(training_score, ostensive_binary) |>  
+    mutate(ostensive_binary = as.factor(ostensive_binary)) 
+
+#Define the Task for RQ #1
+task_RQ_1 <- makeClassifTask(data = data_RQ_1, target = "ostensive_binary")
+
+#Research Question #2
+#extract only the two columns from the large pre-processed dataset that are needed for the research question: training score and the nonostensive binary outcome variable
+data_RQ_2 <- training_data |> 
+  select(training_score, nonostensive_binary) |> 
+  mutate(nonostensive_binary = as.factor(nonostensive_binary)) 
+
+#Define the task for RQ #2
+task_RQ_2 <- makeClassifTask(data = data_RQ_2, target = "nonostensive_binary")
+
+#Research Question #3
+#take out the two outcome variables that we don't want to use in this analysis but leave every other predictor
+data_RQ_3_factor <- training_data |> 
+  select(-c(ostensive_binary, nonostensive_binary)) |> 
+mutate(across(sex, desexed, purebred, gaze_follow, os_best), as.factor)
+
+data_RQ_3_numeric <- data_RQ_3_factor |> 
+mutate(across(sex, desexed, purebred, gaze_follow), as.numeric)
+
+#Define the task for RQ #3
+task_RQ_3_factor <- makeClassifTask(data = data_RQ_3_factor, target = "os_best")
+
+task_RQ_3_numeric <- makeClassifTask(data = data_RQ_3_numeric, target = "os_best")
+
+```
+
+Now we have created all the tasks we will need for every model we run! That is why it is nice to define the data before you create the model. We save ourselves extra coding and make our coding more readable.
+
+### Creating Models for Question 1
+
+Since the [learner](#learner) defines the model we are using, we will need a learner for each model we plan to run. As we discussed in the previous section, we will be running 3 models for our first and second research questions and two models for our third.
+
+To create a learner we need to use the `makeLearner()` function. We will pass to that function what type of algorithm we are using and if it is classification, regression, or unsupervised. We will only be using classification for this tutorial since we want to classify things into groups, so all of our algorithms will start with `classif`.
+
+```{r}
+#Creating the KNN learner for RQ1
+
+knn_learner_RQ_1 <- makeLearner("classif.knn")
+
+```
+
+Now, we have our learner- but it's actually missing something: the hyperparameter of what k should be. We need to tell the model how many adjacent data points we want it to use to classify the validation set. Now, we could guess and just make it 3 because that is what we have seen in some examples, but let's let the math do it for us instead. We can use code to check a bunch of different values and then we can use the value that gives us the best prediction rates. Let's go!
+
+```{r message=FALSE, warning=FALSE}
+#finding the best value of k
+
+#define values to check. Best to check 1 through 10 to start.
+knnParamSpace_RQ_1 <- makeParamSet(makeDiscreteParam("k", values = 1:10))
+#tell the computer to search every value of k we offered (1 thru 10)
+gridSearch_RQ_1 <- makeTuneControlGrid()
+#cross validate for the k finding
+cvForTuning <- makeResampleDesc("RepCV", folds = 10, reps =20)
+#Use the tuneParams function and the task we made above to get the best k value
+tunedk_RQ_1 <- suppressMessages({ 
+  tuneParams("classif.knn", task = task_RQ_1, resampling = cvForTuning,
+                          par.set = knnParamSpace_RQ_1, control = gridSearch_RQ_1, show.info = F)
+  }) 
+```
+
+You will notice that in the `tunedk_RQ_1` I have the `suppressMessages()` function. This is not necessary when running models yourself, and can be deleted from the code. I have added this function throughout the tutorial so that many redundant messages aren't printed in the final document. You might want to keep this function in your code if you want only the absolutely necessary outputs. Now let's print the result of our tuning:
+
+```{r}
+tunedk_RQ_1
+```
+
+A k of 9 gave us the best mmce or mean misclassification error. The mean misclassification error is a great way to check the prediction accuracy, as it is simply the proportion of cases classified as the wrong class. So currently we have 29% of our data being classed incorrectly. Let's add this k of 9 into our learner and keep going!
+
+```{r}
+#Creating the KNN learner for RQ1
+knn_learner_RQ_1 <- makeLearner("classif.knn", par.vals = list("k"=9))
+
+```
+
+Now we need to put it all together to train our model and then perform cross validation. Remember we already made our cross validation argument in the cross validation section: `loocv <- makeResampleDesc(method = "LOO")`. The `resample()` function runs the model multiple times with the data from each of the different cross validation sets. We just have to feed it the task, learner, and cross validation arguments we made earlier.
+
+```{r results = 'hide', warning=FALSE, message=FALSE}
+#Training the model while cross validating
+KNN_model_RQ_1 <- suppressMessages({ train(learner = knn_learner_RQ_1, task = task_RQ_1)
+  })
+
+#Get a sense of how well the model with work in practice with cross validation
+KNN_model_RQ_1_loocv <- suppressMessages({ 
+  resample(learner = knn_learner_RQ_1, task = task_RQ_1, 
+           resampling = loocv, measures = list(mmce, acc))  
+  }) 
+
+```
+
+Now that we made the model and then cross validated it using Leave one out cross validation, we can look at the loss/cost function to see how our model is performing. In this case our loss/cost functions are accuracy (acc) and mean misclassification error (mmce). The `aggr` function gives you the two performance metrics I asked the model to pull out in the `measures` argument. A performance metric tells you how well the model predicted the correct category. As noted above, the **mmce** is mean misclassifications error or the proportion of incorrectly classified cases, and **acc** is the accuracy or the proportion of correctly classified cases. You will notice that the two together add up to 100%, so you really only need one or the other.
+
+```{r}
+#Performance
+KNN_model_RQ_1_loocv$aggr
+```
+This model didn't perform well. We are currently classifying 70% of the data correctly. Let's run some other models and see if we can do better than this.
+
+Next on our list is making a decision tree. The argument you will need to make a decision tree (NOT a random forest but just 1 tree) is `classif.rpart`.
+
+```{r}
+#Creating the learner for a Single decision tree
+decisiontree_learner_RQ_1_and_2 <- makeLearner("classif.rpart")
+
+```
+
+Now we can pass our learner to the `resample` function along with our cross-validation procedure and task. 
+
+```{r echo = T, results = 'hide'}
+#Training the model 
+decision_tree_model_RQ_1 <- suppressMessages({ 
+  train(learner = decisiontree_learner_RQ_1_and_2, 
+        task = task_RQ_1)
+  })
+
+#Checking how well the model does using cross validating
+decision_tree_model_RQ_1_loocv <- suppressMessages({ 
+  resample(learner = decisiontree_learner_RQ_1_and_2, 
+           task = task_RQ_1, resampling = loocv, 
+           measures = list(mmce, acc))
+  })
+```
+
+Now let's check how well the decision tree model is working with the data by looking at our loss/cost function.
+
+```{r}
+#Performance of the Decision Tree
+decision_tree_model_RQ_1_loocv$aggr
+```
+The decision tree did a little better than the KNN model did (71% vs 71.5%) but they currently look pretty similar. We won't see the final differences until they have been evaluated on new unseen data in Step 5. Something to look forward to!
+
+The third and last model we want to test with this first research question is a SVM model. The SVM model is the most complex and computational expensive model and/that has multiple hyperparameters that need tuning. The four hyper parameters that are most important to tune are `kernel`, `cost`, `degree`, and `gamma`. Each of the four hyperparameters deals with changing the decision boundary slightly. A [Decision boundary](#db) is the hyper-plane (often line or squiggle) that separates the data into two classes.
+
+  + `kernel` - The kernel defines what type of line you want the algorithm to fit to the data. There are four possible options: a line, a polynomial, a radial (circle), or a sigmoid. You only need to check the last three because a one degree polynomial is the same as a line, and if you ask the computer to calculate both you are just wasting time and computational power.
+  + `cost` - This controls how tolerant you will be of misclassifications - i.e., how hard or soft the margin of the decision boundary is. If it's soft (larger number) it allows misclassifications. If it's hard (larger number) it doesn't allow any misclassifications.
+  + `degree` - This controls how "bendy" the decision boundary is. Higher values mean more bendy. The bendier/squigglier the line, the more it fits the testing data and usually the less it generalizes to new unseen data. See the [regularization section](#regularization) on overfitting/underfitting. 
+  + `gamma` - This controls how much influence the algorithm gives to individual data points. Large values of Gamma mean more intricate decision boundaries (i.e., A more squiggly line that maps every point instead of generalizes with a more linear line) and more likely to have overfitting.
+
+Now we will define the hyperparameters that we want to tune with the same functions we used to define k up above.
+```{r}
+#Create vector listing the possible kernels you can 
+kernels <- c("polynomial", "radial", "sigmoid")
+
+svm_parametercheck <- makeParamSet(makeDiscreteParam("kernel", values = kernels),
+                                       makeIntegerParam("degree", lower =1, upper = 3),
+                                       makeNumericParam("cost", lower = 0.1, upper =10),
+                                       makeNumericParam("gamma", lower = 0.1, upper = 10))
+```
+
+Now that we have defined what we want the computer to check we have to tell it how to search through the values. Previously, in the KNN model above, we just had the computer search every value between 1 and 10 with `makeTuneControlGrid()` but if we had the computer look through every value we specified above, we would be waiting a *very* long time. Instead we will ask the computer to randomly search through a smaller subsection of the values with the `makeTuneControlRandom` argument. You should search through as many as you have computer power for. Where to start depends on how many values you are searching through. Degree can only be 3 values, so if I was only tuning that hyperparameter, 3 would be the same as searching through every value. However, cost and gamma could be any value between 0.1 and 10, which has hundreds of possible values if we are only going to the hundredths place. Start with a number that would reasonably check at least 5% of values and then run it multiple times. If you consistently get the same values each time you run, you probably have a high enough maximum iteration (below this is defined under `maxit`) value. If you keep getting very different values each time you run it, increase the maximum iteration value iteratively until you have consistently in results.
+
+Since this is just an example, though we will choose a small number so it runs quickly. Let's do that now!
+
+```{r}
+randomsearch <- makeTuneControlRandom(maxit = 50)
+```
+
+Next, we will tell our computer to run code using multiple cores (i.e., CPUS) of our computer at once. This helps speed up the computation process by using more of the computer. While the myth that humans only use 10% of their brains is false, computers really don't use all of their brain unless you tell them to. Check how many cores your computer has with `parallel::detectCores()`. My machine has 24 CPUS (as you can see in the output below), so we'll use all of them with the `parallelStartSocket` function. Note that if you use all of your cores, your computer can't really do anything else while it is working. So if you want to check email, browse the web, or keep coding during the computation, leave a core or two out.
+
+We also need a cross validation set for this search. We could use the `cvForTuning` we made earlier with 10 folds and 20 repetitions of each, but that would create 200 iterations. With that many iterations `cvForTuning` is likely to find the best hyperparameters for our question - but it would take more than 30 minutes to complete on my 24 core machine. Instead, we will make a new cross validation approach called `cvForTuning2` with only 5 folds and 5 repetitions creating 25 iterations. This will only take 6 minutes.
+
+Throughout this tutorial you will notice that there are many instances where we have to iteratively go through multiple options per problem. Over time, working with different code and algorithms, you will develop an intuition for what is the optimal number of iterative steps for different problems. More is always better - except for the costs of time and computational power. Often you will run into the problem of diminishing returns on very large cross validation steps. If it is crucial you get something as correct as possible you might have to run your computer for a whole week. If you had an unlimited resource of computational power, then the best option would be to run millions of iterations to be sure you have the exact right set of hyperparameters. However, one of the primary roles of the data scientist in a non-infinite world is to determine the optimal solution to trade off questions of accuracy, time, and power. Throughout this tutorial I am trying to give you a sense of that intuition. In this tutorial I am trying to show you the decision points to pay attention to as you gain that experience, so you can be more transparent - to yourself, as well as to others -  when documenting your choices in those decision points. However, you will not be perfect at this skill overnight. It will develop over time as you became more familiar with machine learning.
+
+```{r  message=FALSE, warning=FALSE}
+#use all of the cpus on your computer
+parallelStartSocket(cpus = detectCores())
+
+#cross validation procedure for tuning this SVM algorithm
+cvForTuning2 <- makeResampleDesc("RepCV", folds = 5, reps =5)
+
+#Tune the hyperparameters
+tunedSvmPars_RQ1 <- suppressMessages({ 
+  tuneParams("classif.svm", task = task_RQ_1, 
+             resampling = cvForTuning2, 
+             par.set = svm_parametercheck, 
+             control = randomsearch)
+})
+```
+```{r}
+tunedSvmPars_RQ1
+```
+Now we have the answer to what some optimal hyperparameter values will be for the SVM for this task! However, if you run the above code multiple times you will notice that you don't get the same results. This is because it isn't searching through every possible option; rather, it tells you the best option from the random hyperparameters it happened to search through this time. This suggests that if this model appears to perform among the best compared to the other models you've evaluated, it's worthwhile to revisit this step and conduct additional cross-validation iterations before settling on the final model hyperparameters. 
+
+I ran the above code 3 times, and it always chooses a polynomial for the kernel function so we could set polynomial and then just re-tune the other three hyperparameters. Across the 3 iterations, the algorithm choose degree 2 twice and 3 once. The cost and gamma functions changed more widely with values for cost ranging from 1.99 to 9.11. Values for gamma ranged from 3.93 to 9.18.
+
+Let's put the most recent hyperparameters into the learner and then run the model with our cross validation approach!
+
+```{r}
+#Make the SVM Learner
+SVM_learner_tuned_RQ_1 <- makeLearner("classif.svm", par.vals = tunedSvmPars_RQ1$x)
+
+#Train the model
+SVM_model_RQ_1 <- suppressMessages({ 
+  train(learner = SVM_learner_tuned_RQ_1, task = task_RQ_1)
+  })
+
+#Check model performance with LOOCV 
+SVM_model_RQ_1_loocv <- suppressMessages({ 
+  resample(learner = SVM_learner_tuned_RQ_1, 
+           task = task_RQ_1, 
+           resampling = loocv, 
+           measures = list(mmce, acc))
+  })
+
+#Output the Lost/Cost functions for this model
+SVM_model_RQ_1_loocv$aggr
+```
+
+The model and cross validation approach took about 6 and a half minutes to run on my 24 CPU computer using all of them in parallel. This model worked about as well as the Decision tree, but better than our KNN. If we took more time to run a wider range of hyperparameters for degree, cost, and gamma, the accuracy of the final model would most likely increase. If you are working through this with me, why don't you create a cross validation procedure with many more iterations, run it, and then go make lunch and come back and rerun the model code. Did you get a higher accuracy rating? (Also how was your lunch?)
+
+### Creating Models for Question 2
+
+This section will be very similar to the previous learners section, as they have similar constraints and the same predictor variable. The purpose of this section is to show you how to make very small changes in what you feed the model to change the outcome. 
+
+Let's jump straight into finding the correct value of k that minimizes misclassifications for the KNN model for research question 2. The only thing that we have to change is the task we feed the `tuneParams` function.
+
+```{r message=FALSE, warning=FALSE}
+#finding the best value of k
+
+#define values to check. Best to start with checking 1 through 10
+knnParamSpace <- makeParamSet(makeDiscreteParam("k", values = 1:10))
+#tell the computer to search every value of k we offered (1 thru 10)
+gridSearch <- makeTuneControlGrid()
+#cross validate for the k finding
+cvForTuning <- makeResampleDesc("RepCV", folds = 10, reps =20)
+#Use the tuneParams function and the task we made above to get the best k value
+tunedk_RQ_2 <- suppressMessages({ 
+  tuneParams("classif.knn",
+             task = task_RQ_2, 
+             resampling = cvForTuning, 
+             par.set = knnParamSpace, 
+             control = gridSearch)
+})
+
+tunedk_RQ_2
+```
+The correct k for this research question was 8! Let's update the learner to include this new hyperparameter setting.
+
+```{r}
+knn_learner_RQ_2 <- makeLearner("classif.knn", par.vals = list("k"=8))
+```
+
+
+Now we can run our model with the new learner, task, and cross validation. 
+
+```{r echo = T, results = 'hide'}
+#Running the KNN model for RQ 2
+KNN_model_RQ_2 <- suppressMessages({ 
+  train(learner = knn_learner_RQ_2, task = task_RQ_2)
+})
+
+#Running cross validating
+KNN_model_RQ_2_loocv <- suppressMessages({ 
+  resample(learner = knn_learner_RQ_2, 
+           task = task_RQ_2, 
+           resampling = loocv, 
+           measures = list(mmce, acc))
+})
+```
+```{r}
+#Looking at how this model did
+KNN_model_RQ_2_loocv$aggr
+```
+Interestingly, this model worked better than the previous KNN model with research question 1 (70% vs 77%). So, training score must be slightly more predictive for the nonostensive task. 
+
+To run a decision tree model, we can use the same learner as from research question 1 as we didn't have to do any tuning. Therefore, we can simply run the decision tree model immediately with the pre-made learner, task, and cross validation procedure.
+
+```{r echo = T, results = 'hide'}
+#Trainging the Decision Tree model for RQ #2
+decision_tree_model_RQ_2 <- suppressMessages({ 
+train(learner = decisiontree_learner_RQ_1_and_2, 
+      task = task_RQ_2)
+  })
+                                     
+#Cross validating
+decision_tree_model_RQ_2_loocv <- suppressMessages({ 
+  resample(learner = decisiontree_learner_RQ_1_and_2, 
+           task = task_RQ_2, 
+           resampling = loocv, 
+           measures = list(acc))
+})
+```
+```{r}
+#Performance of the Decision Tree
+decision_tree_model_RQ_2_loocv$aggr
+```
+This decision tree had the same accuracy as the KNN model for this research question as far as we can tell from the proportion of correct classifications.
+
+Now we have to run the SVM and tune it with the new hyperparameters that work best on this task. Most of what we defined above will work with this algorithm, so we don't need to set new hyperparameters or cv values - we just have to feed the new data to what we already made!
+
+```{r echo = T, results = 'hide'}
+#Tuning hyperparameters for SVM model
+tunedSvmPars_RQ2 <- tuneParams("classif.svm", task = task_RQ_2, resampling = cvForTuning2, par.set = svm_parametercheck, control = randomsearch)
+
+#show me what hyperparameters worked best
+tunedSvmPars_RQ2
+
+#update learner with the choosen hyperparameters
+SVM_learner_tuned_RQ_2 <- makeLearner("classif.svm", par.vals = tunedSvmPars_RQ2$x)
+
+#Run the model  
+SVM_model_RQ_2 <- suppressMessages({ 
+  train(learner = SVM_learner_tuned_RQ_2, task = task_RQ_2)
+})
+
+#Run Cross Validation
+SVM_model_RQ_2_loocv <- suppressMessages({ 
+  resample(learner = SVM_learner_tuned_RQ_2, 
+           task = task_RQ_2, 
+           resampling = loocv, 
+           measures = list(mmce, acc))
+})
+```
+```{r}
+#performance
+SVM_model_RQ_2_loocv$aggr
+```
+
+This model was also about the same as the decision tree model on accuracy. 
+
+### Creating Models for Question 3
+
+The two models we decided fit with our model assumptions and data for research question 3 are a KNN model and a Random Forest model. We will start by tuning the k hyperparameter for our KNN model. As this has many more predictors than our first two questions, we will investigate with a wider set of ks. If the k that is chosen is at the top of your range (not somewhere in the middle), you haven't searched through a wide enough range of values.
+
+```{r echo = T, results = 'hide'}
+#finding the best value of k
+
+#define values to check best to check 1 through 10
+knnParamSpace <- makeParamSet(makeDiscreteParam("k", values = 1:50))
+#tell the computer to search every value of k we offered (1 thru 10)
+gridSearch <- makeTuneControlGrid()
+#cross validate for the k finding
+cvForTuning <- makeResampleDesc("RepCV", folds = 10, reps =50)
+#Use the tuneParams function and the task we made above to get the best k value
+tunedk_RQ_1 <- tuneParams("classif.knn", task = task_RQ_3_numeric, resampling = cvForTuning, par.set = knnParamSpace, control = gridSearch)
+```
+```{r}
+tunedk_RQ_1
+```
+
+The answer was 43 so we will now use that value of k for our learner. 
+
+```{r}
+#Creating the KNN learner for RQ1
+knn_learner_RQ_3 <- makeLearner("classif.knn", par.vals = list("k"=34))
+```
+
+Now we run the learner with the task and cross validation and get our prediction accuracy. 
+
+```{r}
+#Training the model 
+KNN_model_RQ_3 <- suppressMessages({ 
+  train(learner = knn_learner_RQ_3, task = task_RQ_3_numeric)
+})
+
+#cross validating
+KNN_model_RQ_3_loocv <- suppressMessages({ 
+  resample(learner = knn_learner_RQ_3, 
+           task = task_RQ_3_numeric, 
+           resampling = loocv, 
+           measures = list(acc))
+})
+
+#Preformance
+KNN_model_RQ_3_loocv$aggr
+```
+The KNN model for Research Question 3 did about as good as the models trained on fewer predictors (76%).
+
+Next is the random forest algorithm. We can first just make a learner with the `randomForest` model type.
+  
+```{r}
+randomforest_learner_RQ_3 <- makeLearner("classif.randomForest")
+```
+
+Like SVM, random forest algothims also have a number of hyperparameters that need to be investigated and tuned to the correct values before we run the model. In random forest the four hyperparameters that should be tuned as best practice before the model can be run are: `ntree` `mtry` `nodesize` and `maxnodes`. 
+
+  + `ntree` - the number of trees you want the model to run
+  + `mtry` - the number of features/predictors to sample at each node
+  + `nodesize` - minimum number of observations allowed in a leaf
+  + `maxnodes` - max number of leaves
+  
+We will let the `ntree` and `nodesize` values stay at its default of 500 and 1 respectively as we don't have a particularly large or small amount of data that would suggest we change the default values. These can always be adjusted later after you have tuned anything else. Before we decide what values to choose for the `mtry` and `maxnodes` this is a good time to show you how to check what hyperparameters there are for any specific algorithm. The function `getParamSet` lists the parameters and the default value where applicable.
+
+```{r}
+getParamSet("classif.randomForest")
+```
+Now we know how to look at the tunable parameters, let's go back to deciding how to choose what values to use in tuning with `mtry` and `maxnodes`. We only have 16 predictors, so let's do the full range of 1 to 16 for the number of features to sample at each node. For `maxnodes` we have to choose values less than the number of observations `nrow(training_data)`. For now, let's leave it at null so it can grow without restriction because we aren't as worried about time and computing power with a dataset so small. We only have 1 parameter to tune and so we will do that below:
+
+```{r echo = T, results = 'hide'}
+forestParamSpace <- makeParamSet(makeIntegerParam("mtry", lower = 1, upper = 16))
+
+randomsearch_100 <- makeTuneControlRandom(maxit = 100)
+
+cvForTuning_randomforest <- makeResampleDesc("CV", iters = 5)
+
+tunedForestPars <- suppressMessages({ 
+  tuneParams(learner = randomforest_learner_RQ_3, 
+             task = task_RQ_3_factor, 
+             resampling = cvForTuning_randomforest,
+             par.set = forestParamSpace, 
+             control = randomsearch_100)
+})
+
+```
+```{r}
+#Show the result
+tunedForestPars
+```
+
+And the result was that 1 was the best value to use for `mtry`. Now we have to update the learner with the tuned parameter and plug everything into the `resampling` function and make the model. 
+
+```{r echo = T, results = 'hide'}
+#Update the learner
+randomforest_learner_RQ_3 <- makeLearner("classif.randomForest", par.vals = list("mtry"=1))
+
+#Train the Model
+random_forest_model_RQ_3 <- suppressMessages({ 
+  train(learner = randomforest_learner_RQ_3, task = task_RQ_3_factor)
+})
+
+#Cross validating
+random_forest_model_RQ_3_loocv <- suppressMessages({ 
+  resample(learner = randomforest_learner_RQ_3, 
+           task = task_RQ_3_factor, 
+           resampling = loocv, 
+           measures = list(mmce, acc))
+})
+```
+
+```{r}
+#Performance
+random_forest_model_RQ_3_loocv$aggr
+```
+Both the random forest model and the KNN model performed the same when they were cross validated. 
+
+## Generic Logistic Regression Example
+
+While the current data did not call for us to use logistic regression, it is still a useful algorithm to know how to use for many potential problems. So, here is code that you can use to run your own logistic regression. 
+
+We will use the task we created for research question 1. We will have to make a new learner to define our model using the `classif.logreg` argument for logistic regression. Set the argument `predict.type` equal to `prob` if you want the estimated probabilities of each class outputted, as well as what class each observation is predicted to be in. Then all you have to do is put it together and cross validate:
+
+```{r}
+LR_learner_RQ_1 <- makeLearner("classif.logreg", predict.type = "prob")
+
+LR_model_RQ_1 <- suppressMessages({ 
+  train(LR_learner_RQ_1, task_RQ_1)
+})
+
+LR_model_RQ_1_loocv <- suppressMessages({ 
+  resample(learner = LR_learner_RQ_1, 
+                       task = task_RQ_1,
+                       resampling = loocv)
+})
+
+LR_model_RQ_1_loocv$aggr
+```
+As predicted, this model did *NOT* do a good job at predicting the correct category for our dogs. 
+
+## Generic Naive Bayes Example
+
+As with logistic regression, we had decided not to use Naive Bayes for this example dataset, but having some base code may be handy for those cases where it would be appropriate. Naive Bayes algorithms only have one hyperparameter to tune, `laplace`. You typically want to add a small value to `laplace`, as it is just a placeholder that adds that value to all of the probabilities to handle the issue of a zero probability for some features. Unseen feature values (0s) are assigned a small, non-zero probability, which helps prevent zero probabilities from making your probabilities be artificially low (as anything multiplied by 0 is 0), and improves the robustness of the Naive Bayes classifier.
+
+I will use the `task_RQ_1` task and we have to make the learner, train the model, and cross validate.
+
+```{r}
+NB_learner_RQ_1 <- makeLearner("classif.naiveBayes", par.vals = list("laplace" = 1))
+  
+NB_model_RQ_1 <- train(learner = NB_learner_RQ_1, 
+                       task = task_RQ_1)
+
+NB_model_RQ_1_loocv <- suppressMessages({ 
+  resample(learner = NB_learner_RQ_1, 
+                       task = task_RQ_1,
+                       resampling = loocv)
+})
+
+NB_model_RQ_1_loocv$aggr
+```
+You'll notice that we are at about 71.6% accuracy which is less predictive than most of our models. But this and all our other models haven't been tested with new data - let's do that now!
+
+# Step 5: Compare Model Outcomes
+
+So far, we know how the models worked on the training data, but we haven't fed our models any of our held-out testing data. To compare how each of the models did against each other we need to look at how each model does on new *unseen* data. We will do this by looking at prediction accuracy and (poorly named!) [confusion matrices](https://blog.roboflow.com/what-is-a-confusion-matrix/). A confusion matrix is far from confusing: it is simply a 4 by 4 table showing the false positive, false negative, true positive, and true negative rates that were produced by a specific model: 
+
+```{r, include=FALSE}
+confusion_matrix <- data.frame(
+  Predicted_value = c("Model Predicted 1", "Model predicted 0"),
+  Actual_value_was_1 = c("True Positive", "False Negative"),
+  Actual_value_was_0 = c("False Positive", "True Negative"))
+ 
+
+kable(confusion_matrix)
+```
+
+Now that we know how to read a confusion matrix, let's make the testing data frames we need to feed into the models.
+
+```{r}
+#Research Question #1
+#extract only the two columns from the large pre-processed testing dataset we made in step 1 that are needed for the research question: training score and the ostensive binary outcome variable
+testing_data_RQ_1 <- testing_data |> 
+  select(training_score, ostensive_binary) |> 
+      mutate(training_score = as.numeric(training_score),
+         ostensive_binary = as.factor(ostensive_binary))
+
+#Research Question #2
+#extract only the two columns from the large pre-processed dataset that are needed for the research question: training score and the nonostensive binary outcome variable
+testing_data_RQ_2 <- testing_data |> 
+  select(training_score, nonostensive_binary) |> 
+    mutate(training_score = as.numeric(training_score),
+         nonostensive_binary = as.factor(nonostensive_binary))
+
+#Research Question #3
+#take out the two outcome variables that we don't want to use in this analysis but leave every other predictor
+testing_data_RQ_3_factor <- testing_data |> 
+  select(-c(ostensive_binary, nonostensive_binary)) |> 
+mutate_at(vars(sex, desexed, purebred, gaze_follow, os_best), as.factor)
+
+```
+
+Now that we have our testing data for each of the three research questions, we can use the two functions in `mlr` that help us look at model outcomes: `predict` and `performance`. `predict` lets us feed a model and new data into the function to get the predicted classification for each observation in the testing data. You then feed the object you made with `predict` into `performance` to get the confusion matrix information. Cool, right? Let's do it!
+
+```{r}
+#predicting new values and getting performance metrics for all 3 models run with RQ 1
+#KNN model
+knn_predictions_RQ1 <- predict(KNN_model_RQ_1, newdata = testing_data_RQ_1)
+
+performance(knn_predictions_RQ1)
+
+calculateConfusionMatrix(knn_predictions_RQ1)
+```
+The KNN model is classifying 75% of the cases correctly, which sounds okay. However, when we look further into the confusion matrix, we can see that the algorithm is classifying almost every observation as 0 (i.e., that almost every dog was performing below chance at the ostensive task, which we know isn't correct). So, this algorithm is probably not a good one to use when understanding the true relationship between the predictor and variable.
+
+```{r}
+#Decision Tree
+decision_tree_predictions_RQ1 <- predict(decision_tree_model_RQ_1, newdata = testing_data_RQ_1)
+
+performance(decision_tree_predictions_RQ1)
+
+calculateConfusionMatrix(decision_tree_predictions_RQ1)
+```
+The decision tree model did even worse than our simplest model as it predicted *every* observation would be 0. Again, not very useable.
+
+```{r}
+#SVM
+SVM_predictions_RQ_1 <- predict(SVM_model_RQ_1, newdata = testing_data_RQ_1)
+
+performance(SVM_predictions_RQ_1)
+
+calculateConfusionMatrix(SVM_predictions_RQ_1)
+```
+The SVM algorithm has the same results as our decision tree even though it took 10 times as long to train. Again, not very useable.
+
+Now let's do the same thing for research questions 2.
+
+```{r}
+#predicting new values and getting performance metrics for all 3 models run with RQ 2
+#KNN model
+knn_predictions_RQ2 <- predict(KNN_model_RQ_2, newdata = testing_data_RQ_2)
+
+performance(knn_predictions_RQ2)
+
+calculateConfusionMatrix(knn_predictions_RQ2)
+```
+This KNN model performed worse than RQ 1, but had the same issue in that it predicted everything would be 0. (These models really don't think much of our dog's intelligence!)
+
+```{r}
+#Decision Tree
+decision_tree_predictions_RQ2 <- predict(decision_tree_model_RQ_2, newdata = testing_data_RQ_2)
+
+performance(decision_tree_predictions_RQ2)
+
+calculateConfusionMatrix(decision_tree_predictions_RQ2)
+```
+This decision tree did just as bad as the KNN.
+
+```{r}
+#SVM
+SVM_predictions_RQ2 <- predict(SVM_model_RQ_2, newdata = testing_data_RQ_2)
+
+performance(SVM_predictions_RQ2)
+
+calculateConfusionMatrix(SVM_predictions_RQ2)
+```
+This algorithm did slightly better than the KNN model but still had similar issues. 
+
+Now let's do the same thing for research question 3!
+
+```{r}
+#predicting new values and getting performance metrics for all 3 models run with RQ 2
+#KNN model
+knn_predictions_RQ3 <- predict(KNN_model_RQ_3, newdata = testing_data_RQ_3_factor)
+
+performance(knn_predictions_RQ3)
+
+#Dig deeper into predictions with a confusion matrix
+calculateConfusionMatrix(knn_predictions_RQ3)
+```
+Unlike in RQ 1 and 2, the algorithm now is predicted that everything will be 1 (i.e., that all dogs will perform better at the nonostensive task than the ostensive, which doesn't fit what we know about how dogs use human cueing). This is also not a very helpful algorithm to use in the future.
+
+```{r}
+#Random Forest
+randomforest_predictions_RQ3 <- predict(random_forest_model_RQ_3, newdata = testing_data_RQ_3_factor)
+
+#Measure how well the model did at predictions
+performance(randomforest_predictions_RQ3)
+
+#Dig deeper into predictions with a confusion matrix
+calculateConfusionMatrix(randomforest_predictions_RQ3)
+```
+The random forest algorithm has the exact same results as the KNN. 
+ 
+## Concluding Insights
+
+What we have found out is that none of the predictors in the models were able to helpfully predict the outcome on the tasks. This means one of two things: 1) That we need to collect more data to understand the relationship between all these variables and the outcome behavioral task or 2) That none of the collected attributes predict the outcome well. For this specific data set no algorithm can get better results than just guessing the most common outcome for every subject. This is because this dataset is highly skewed. This example illustrates an important lesson in the importance of having symmetrically distributed outcome variables.
+
+You will also notice that there wasn't a significant increase in prediction accuracy between the simplest models and the most complicated (computationally expensive) models. This is true across most machine learning problems. Often the simplest models do a good job at predicting and more complicated models don't increase predictive accuracy a huge amount. The more hyperparameters you tune and the more cross-validation loops you add, the more you can usually expect a slight increase in predictive accuracy. So when you are engaging in these practices yourself its good to temper expectations with wildly improving models with increased computing power. You typically get diminishing returns when adding complexity. After a certain point adding complexity is only causing your model to overfit to the current data set and therefore perform poorly on new data.
+
+Wait, so after all that work what do we have? While we dealt with missing data, completed all necessary assumption checks per model, ran hyperparameter tuning to help fitting, and ran multiple algorithms...what we eventually got was a bunch of models that performed poorly and don’t have good spread across prediction. This is an extremely important lesson: machine learning isn’t a magic wand that will generate significant effects out of thin air. Not all datasets are predictive for every research question! Machine learning can’t replace collecting lots of good representative data, or asking appropriate research questions – that’s up to you. Luckily, you now have the skills to apply classification machine learning to a new question.
+
+I hoped this tutorial was helpful! If you want to learn more about any of the concepts I referenced in this tutorial please look through my citations sections below as well as the linked websites throughout. The three textbooks I used for this tutorial were invaluable to my progress in machine learning and all three can be accessed for free online. Happy Predicting!
+
+<div style="text-align: center;">
+**YOU DID IT!!!**
+</div>
+
+![](https://media4.giphy.com/media/g9582DNuQppxC/200.gif)
+
+## Glossary of Terms
+
+  + [Parametric vs Non-parametric testing](https://builtin.com/data-science/parametric-vs-nonparametric){#paranonpara}
+  + [4 Types of Variables](https://www.mygreatlearning.com/blog/types-of-data//){#variables}
+  + [Binary Variables](https://www.learndatasci.com/glossary/binary-variable/){#binary}
+  + [Decision Boundary](https://klu.ai/glossary/decision-boundary){#db}
+  + [Lost/Cost Function](https://www.enjoyalgorithms.com/blog/loss-and-cost-functions-in-machine-learning){#losscostfunction}
+  + [Generalization error](https://medium.com/@yixinsun_56102/understanding-generalization-error-in-machine-learning-e6c03b203036){#generror}
+  + [Histogram](https://towardsdatascience.com/interpreting-eda-chapter-i-8d0999e372a2){#histogram}
+  + [Hyperparameters](https://towardsdatascience.com/parameters-and-hyperparameters-aa609601a9ac){#hyperparameters} - Hyperparameters are any variable in a model that change the accuracy and precision of a model that are not learned from the data. This is in contrast to variables in the model that are learned from the data (i.e. parameters). For example, in a random forest model the number of decision trees that you want the computer to run is a hyperparameter but the best predictor to sample at the first node of each tree is a parameter as that is what the model learns using the data. Thinking more about the best start value for different types of hyperparameters is a whole book/tutorial in itself! In fact someone wrote a [book](https://library.oapen.org/viewer/web/viewer.html?file=/bitstream/handle/20.500.12657/60840/978-981-19-5170-1.pdf?sequence=1&isAllowed=y) on how to tune hyperparameters in R that is freely available. Please see this book and seek out additional resources on your own when tuning hyperparameters for your own analyses.
+  + [Feature Selection](https://domino.ai/data-science-dictionary/feature-selection){#feature}
+  + [Collinearity](https://www.stratascratch.com/blog/a-beginner-s-guide-to-collinearity-what-it-is-and-how-it-affects-our-regression-model/){#collinearity}
+
+## Package Versions
+
+Below I have listed the R and package versions I am using. If you are reading this tutorial in the future after updates have broken code, you can revert back.
+
++ R Version
+  - 4.3.3
++ tidyverse 
+  - Version 2.0.0
++ knitr 
+  - Version 1.46
++ here 
+  - Version 1.0.1
++ janitor
+  - Version 2.2.0
++ ggpubr 
+  - Version 0.6.0
++ car 
+  - Version 3.1.2
++ knitr 
+  - Version 1.46
++ mlr 
+  - Version 2.19.1
++ parallelMap 
+  - Version 1.5.1
++ parallel
+  - Version 4.3.3
++ randomForest
+  - Version 4.7.1.1
+
+## Citations
+
+ManyDogs Project, Espinosa, J., Hare, E., Alberghina, D., Perez Valverde, B, & Stevens, J.R. (2024). Data for ManyDogs 1. OSF Preprints doi:10.31219/osf.io/jw24a
+
+James, G., Witten, D., Hastie, T., & Tibshirani, R. (2013). An Introduction to Statistical Learning: With Applications in R (1st ed. 2013, Corr. 7th printing 2017 edition). Springer.
+
+Machine Learning with R, the tidyverse, and mlr. (2020). Manning Publications. Retrieved April 28, 2024, from https://www.manning.com/books/machine-learning-with-r-the-tidyverse-and-mlr
+
+PhD, J. S. (2022). The StatQuest Illustrated Guide To Machine Learning. Independently published.

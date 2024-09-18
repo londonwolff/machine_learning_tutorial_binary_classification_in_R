@@ -1,0 +1,72 @@
+```{r, include=FALSE}
+library(knitr)
+```
+
+# Step 4: Choosing Algorithms & Running Models {#4a}
+
+## Choosing an Algorithm
+
+Throughout this tutorial so far, I have introduced you to 5 main model types: Logistic regression, K nearest neighbors, Naive Bayes, Decision trees/Random forest, and Support vector machines. Let's go through a brief description of what each model does some of the pros and cons of each, as well as what type of predictor and outcome variables each can handle. (I do not plan to explain each algorithm to such depth that you understand the math. That is beyond the scope of this tutorial but there is a linked video describing each algorithm type in detail which gives you an amazing starting point.)
+
+1.  [Logistic Regression](https://www.youtube.com/watch?v=yIYKR4sgzI8){#logisticregression} - Logistic regression fits a S shaped squiggle to data.
+
+-   Pros: it is easily interpretable, and it doesn't assume normally distributed data.
+-   Cons: It won't work if there is complete separation between the two classes (i.e., if there is no overlap on the graph). But it also won't work if there is near total overlap.
+-   Outcome variable type: Takes only binary categorical outcome variables
+-   Predictor variable type: Takes both categorical and continuous predictor variables
+
+2.  [K nearest neighbors](https://www.youtube.com/watch?v=HVXime0nQeI){#knn}(KNN) - KNN algorithms assign unknown data to a category based on what category its neighbors are listed as. For example, if you specify that k is 3, it will look at the classifications of the three closest points to the new data and tell you that your new data is the category that is the average value of the three points. If all three points belong to one category, your new point belongs to that category. If two points belong to one category it will also tell you that your new value belongs to that category.
+
+-   Pros: Simple to understand, makes no assumptions about data
+-   Cons: Can get very computationally expensive to run if you have large datasets; accuracy is significantly impacted by noisy data and outliers; in high-dimensional datasets it performs badly; and categorical data needs to be recoded into numerical to run.
+-   Outcome variable type: Takes only categorical outcome variables
+-   Predictor variable type: Takes both categorical and continuous predictor variables
+
+3.  [Naive Bayes](https://www.youtube.com/watch?v=O2L2Uv9pdDA&t=228s){#naivebayes} - Multiples the probabilities of each feature being found in a particular dataset. For example, if the probability of a dog being 2 years old is 6/10 for the correct choice and 2/10 for the incorrect choice, those probabilities are multiplied with all other probabilities for each variable, and the category with the higher value per observation tells the computer which bin to classify the observation in.
+
+-   Pros: Doesn't need to be tuned for hyperparameters; computationally inexpensive; can handle minimal amount of missing data if need be (good rule of thumb is less than 5% per column); works best on classifying based on words
+-   Cons: Assumes predictor variables are normally distributed; assumes predictors are independent and suffers a lot when they aren't
+-   Outcome variable type: Takes only categorical outcome variables
+-   Predictor variable type: Takes both categorical and continuous predictor variables
+
+4.  [Decision Tress/Random forest](https://www.youtube.com/watch?v=_L39rN6gz7Y)}{#decisiontrees} - A decision tree is a flow chart made by the algorithm that follows a line of logic to its conclusion. You start at the **root** and you go down a branch based on a feature of the data (i.e. high or low score on training) until you reach a **leaf** (bin) that has your final guess for which category a new datapoint should belong to. **Node's** are any point between the start of the tree and a leaf where the algorithm makes a decision to move from branch to branch to leaf. Each node (decision point) partitions predictors based on values that best categorize outcome variables.
+
+-   Pros: Flexible; easily interpretable; no assumptions; more robust to missing data than most other algorithms (good rule of thumb is no more than 10% per column though as predictive accuracy gets worse the more missingness you have); good with outliers. Running multiple decesion trees on different subsections of the data and averaging prediction outcomes is called a random forest. This is easy to remember as many trees creates a forest.
+-   Cons: Individual trees WILL most likely overfit data, so they are rarely used. Instead, I have grouped decision trees with how they are most often used: in a random forest.
+-   Outcome variable type: Takes both categorical and continuous outcome variables
+-   Predictor variable type: Takes both categorical and continuous predictor variables; for random forest you need many predictors to make the forest necessary.
+
+5.  [Support Vector Machines](https://www.youtube.com/watch?v=efR1C6CvhmE){#svm} - Fits the best line possible to data that separates the categories. However, unlike linear or logistic regression it checks all kinds of lines whether that be linear (regular line), polynomial (curved line), sigmoid (S shape), or radial (circle).
+
+-   Pros: Doesn't assume independence in predictors so can be used if you have collinearity or interdependence; performs well on a wide variety of tasks; makes very few assumptions; often works very well on complex nonlinear data structures
+-   Cons: **Very** computationally and time intensive to train, has many hyperparameters that all have to be tuned
+-   Outcome variable type: Can be used for both categorical and continuous outcomes but mostly used for categorical
+-   Predictor variable type: Only takes continuous predictors
+
+## Assessing Algorithms Based on Satisfied Assumptions
+
+Now that we know what [assumptions](#assumptions) are met and how each model deals with data, we can now decide what models to run with each of our three research questions.
+
+As a reminder our research questions are: 1. Does the amount of training a dog has completed predict whether a dog will perform under or over chance on the ostensive behavioral task? 2. Does the amount of training a dog has completed predict whether a dog will perform under or over chance on the nonostensive behavioral task? 3. Which dog characteristics predict whether a dog is more likely to perform better at the nonostensive than ostensive behavioral task?
+
+```{r, echo=FALSE}
+models_to_run <- data.frame(
+  Question = c("Research Question 1", "Research Question 2", "Research Question 3"),
+  Logistic = c("Do Not Run", "Do Not Run", "Do Not Run"),
+  KNN = c("Run", "Run", "Run"),
+  Naive_bayes = c("Do Not Run", "Do Not Run", "Do Not Run"),
+  Decision_trees = c("Run Decision Tree", "Run Decision Tree", "Run Random Forest"), 
+  Support_Vector_Machines = c("Run", "Run", "Do Not Run"))
+
+kable(models_to_run)
+```
+
+We will not run logistic regression because even though our predictors and outcomes work with the model, we have violated independence and linearity (linearity was only violated for question 1 & 2 but not 3). Independence could be corrected by adding a grouping structure for lab/location but that is outside the scope of the current tutorial. Linearity could be fixed with transformations, similar to normality violations. It is best practice to start fixing the issue with the biggest problem, then recheck all of your assumptions. Do not fix multiple problems without first seeing how each individual change effects data attributes.
+
+KNN models can be run for all of the research question because the assumptions are met and the predictors and outcome variables match what a KNN model needs.
+
+Naive Bayes will not be run for any of the models because the independence assumption is violated and cannot be easily worked around by transforming variables or taking into account grouping structure. Furthermore, the normality assumption of the continuous predictor variables is violated for research question 3.
+
+Random forest models could be run in theory for all the questions, because the assumptions are met and the predictors and outcome variables match what the model needs. However, running a random forest with only one continuous predictor is a waste of computational power as it won't give you anything meaningful with so little data. (Remember, random forest models are built by making a large number of individual trees and averaging the results). You could run just one decision tree, which is what we will do below. Running an entire random forest model with one predictor is sort of like using a sharpened chefs knife to saw a piece of wood in half- it'll get the job done but it'll take forever and you've wasted a very good knife.
+
+Support vector machines will be run for research questions 1 and 2, but not 3. The assumptions are met but, SVM can only handle continuous predictor variables. We have a number of variables we believe to be important that are categorical in nature, so we will not run a SVM model for research question 3.wh

@@ -1,0 +1,71 @@
+{
+  "index.qmd": {
+    "index.html": "31cb355e"
+  },
+  "intro.qmd": {
+    "intro.html": "5f19babc"
+  },
+  "summary.qmd": {
+    "summary.html": "27f320c0"
+  },
+  "references.qmd": {
+    "references.html": "312300e7"
+  },
+  "whatisML.qmd": {
+    "whatisML.html": "c2898faa"
+  },
+  "whatisclassML.qmd": {
+    "whatisclassML.html": "b4665c14"
+  },
+  "datadescription.qmd": {
+    "datadescription.html": "34f0a23e"
+  },
+  "researchqs.qmd": {
+    "researchqs.html": "c5508a3d"
+  },
+  "setup.qmd": {
+    "setup.html": "06bfe5f6"
+  },
+  "beforeyoubegin.qmd": {
+    "beforeyoubegin.html": "dc37f72f"
+  },
+  "datacleaning.qmd": {
+    "datacleaning.html": "6abedd43"
+  },
+  "_setup.qmd": {
+    "_setup.html": "214e9bb9"
+  },
+  "twoassumptions.qmd": {
+    "twoassumptions.html": "d23f24c4"
+  },
+  "otherassumptions.qmd": {
+    "otherassumptions.html": "34688cbb"
+  },
+  "modelassumptions.qmd": {
+    "modelassumptions.html": "54544eef"
+  },
+  "regularization.qmd": {
+    "regularization.html": "0061abcd"
+  },
+  "step2.qmd": {
+    "step2.html": "cb203e1f"
+  },
+  "step3.qmd": {
+    "step3.html": "cecb9f6d"
+  },
+  "step4.qmd": {
+    "step4.html": "8817efc1"
+  },
+  "runningmodels.qmd": {
+    "runningmodels.html": "24db3671"
+  },
+  "step5.qmd": {
+    "step5.html": "38ee0a9c"
+  },
+  "conclusion.qmd": {
+    "conclusion.html": "8d39226a"
+  },
+  "glossary.qmd": {
+    "glossary.html": "f19ada28"
+  }
+}

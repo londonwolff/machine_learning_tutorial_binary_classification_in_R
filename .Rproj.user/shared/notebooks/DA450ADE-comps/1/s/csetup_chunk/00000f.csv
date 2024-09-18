@@ -1,0 +1,73 @@
+"0","library(tidyverse) # for data wrangling"
+"1","── [1mAttaching core tidyverse packages[22m ─────────────────────────────────────────────────────────────── tidyverse 2.0.0 ──
+[32m✔[39m [34mdplyr    [39m 1.1.4     [32m✔[39m [34mreadr    [39m 2.1.5
+[32m✔[39m [34mforcats  [39m 1.0.0     [32m✔[39m [34mstringr  [39m 1.5.1
+[32m✔[39m [34mggplot2  [39m 3.5.1     [32m✔[39m [34mtibble   [39m 3.2.1
+[32m✔[39m [34mlubridate[39m 1.9.3     [32m✔[39m [34mtidyr    [39m 1.3.1
+[32m✔[39m [34mpurrr    [39m 1.0.2     
+"
+"1","── [1mConflicts[22m ───────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+[31m✖[39m [34mdplyr[39m::[32mfilter()[39m masks [34mstats[39m::filter()
+[31m✖[39m [34mdplyr[39m::[32mlag()[39m    masks [34mstats[39m::lag()
+[36mℹ[39m Use the ]8;;http://conflicted.r-lib.org/conflicted package]8;; to force all conflicts to become errors
+"
+"0","library(knitr) # for showing you pretty pictures and making tables"
+"0","library(here) # for keeping track of where to get files needed for this tutorial"
+"2","here() starts at C:/Users/lmwol/OneDrive - University of Nebraska-Lincoln/Documents/ADML LAB (lmwolff3@gmail.com)/comps_machine_learning_tutorial
+"
+"0","library(janitor) # for examining and cleaning data"
+"2","
+Attaching package: ‘janitor’
+
+"
+"2","The following objects are masked from ‘package:stats’:
+
+    chisq.test, fisher.test
+
+"
+"0","library(ggpubr) # to make Q-Q plots for testing normality"
+"0","library(car) # for making component plus resistance (CR) plots to check for linearity"
+"2","Loading required package: carData
+"
+"2","
+Attaching package: ‘car’
+
+"
+"2","The following object is masked from ‘package:dplyr’:
+
+    recode
+
+"
+"2","The following object is masked from ‘package:purrr’:
+
+    some
+
+"
+"0","library(mlr) # for doing machine learning in R!"
+"2","Loading required package: ParamHelpers
+"
+"2","Registered S3 method overwritten by 'data.table':
+  method           from
+  print.data.table     
+"
+"0","library(parallelMap) # for running code using all of the available processing power on your computer"
+"0","library(parallel) # for running code using all of the available processing power on your computer"
+"0","library(randomForest) # for running the random forest algorithm"
+"2","randomForest 4.7-1.1
+"
+"2","Type rfNews() to see new features/changes/bug fixes.
+"
+"2","
+Attaching package: ‘randomForest’
+
+"
+"2","The following object is masked from ‘package:dplyr’:
+
+    combine
+
+"
+"2","The following object is masked from ‘package:ggplot2’:
+
+    margin
+
+"

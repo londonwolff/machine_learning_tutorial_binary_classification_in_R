@@ -1,0 +1,42 @@
+## Glossary of Terms
+
+-   [Parametric vs Non-parametric testing](https://builtin.com/data-science/parametric-vs-nonparametric){#paranonpara}
+-   [4 Types of Variables](https://www.mygreatlearning.com/blog/types-of-data//){#variables}
+-   [Binary Variables](https://www.learndatasci.com/glossary/binary-variable/){#binary}
+-   [Decision Boundary](https://klu.ai/glossary/decision-boundary){#db}
+-   [Lost/Cost Function](https://www.enjoyalgorithms.com/blog/loss-and-cost-functions-in-machine-learning){#losscostfunction}
+-   [Generalization error](https://medium.com/@yixinsun_56102/understanding-generalization-error-in-machine-learning-e6c03b203036){#generror}
+-   [Histogram](https://towardsdatascience.com/interpreting-eda-chapter-i-8d0999e372a2){#histogram}
+-   [Hyperparameters](https://towardsdatascience.com/parameters-and-hyperparameters-aa609601a9ac)
+{#hyperparameters} - Hyperparameters are any variable in a model that changes the accuracy and precision of a model that are not learned from the data. This is in contrast to variables in the model that are learned from the data (i.e. parameters). For example, in a random forest model the number of decision trees that you want the computer to run is a hyperparameter but the best predictor to sample at the first node of each tree is a parameter as that is what the model learns using the data. Thinking more about the best start value for different types of hyperparameters is a whole book/tutorial in itself! In fact someone wrote a [book](https://library.oapen.org/viewer/web/viewer.html?file=/bitstream/handle/20.500.12657/60840/978-981-19-5170-1.pdf?sequence=1&isAllowed=y) on how to tune hyperparameters in R that is freely available. Please see this book and seek out additional resources on your own when tuning hyperparameters for your own analyses.
+-   [Feature Selection](https://domino.ai/data-science-dictionary/feature-selection){#feature}
+-   [Collinearity](https://www.stratascratch.com/blog/a-beginner-s-guide-to-collinearity-what-it-is-and-how-it-affects-our-regression-model/){#collinearity}
+
+## Package Versions
+
+Below I have listed the R and package versions I am using. If you are reading this tutorial in the future after updates have broken code, you can revert back.
+
+-   R Version
+    -   4.3.3
+-   tidyverse
+    -   Version 2.0.0
+-   knitr
+    -   Version 1.46
+-   here
+    -   Version 1.0.1
+-   janitor
+    -   Version 2.2.0
+-   ggpubr
+    -   Version 0.6.0
+-   car
+    -   Version 3.1.2
+-   knitr
+    -   Version 1.46
+-   mlr
+    -   Version 2.19.1
+-   parallelMap
+    -   Version 1.5.1
+-   parallel
+    -   Version 4.3.3
+-   randomForest
+    -   Version 4.7.1.1

@@ -1,0 +1,156 @@
+```{r, include=FALSE}
+library(knitr)
+library(mlr)
+library(tidyverse)
+set.seed(1234567)
+testing_data <- read.csv("testing_data.csv")
+
+KNN_model_RQ_1 <- readRDS("KNN_model_RQ_1.rds")
+decision_tree_model_RQ_1 <- readRDS("decision_tree_model_RQ_1.rds")
+SVM_model_RQ_1 <- readRDS("SVM_model_RQ_1.rds")
+KNN_model_RQ_2 <- readRDS("KNN_model_RQ_2.rds")
+decision_tree_model_RQ_2 <- readRDS("decision_tree_model_RQ_2.rds")
+SVM_model_RQ_2 <- readRDS("SVM_model_RQ_2.rds")
+KNN_model_RQ_3 <- readRDS("KNN_model_RQ_3.rds")
+random_forest_model_RQ_3 <- readRDS("random_forest_model_RQ_3.rds")
+
+```
+
+# Step 5: Compare Model Outcomes
+
+So far, we know how the models worked on the training data, but we haven't fed our models any of our held-out testing data. To compare how each of the models did against each other we need to look at how each model does on new *unseen* data. We will do this by looking at prediction accuracy and (poorly named!) [confusion matrices](https://blog.roboflow.com/what-is-a-confusion-matrix/). A confusion matrix is far from confusing: it is simply a 4 by 4 table showing the false positive, false negative, true positive, and true negative rates that were produced by a specific model:
+
+```{r, include=FALSE}
+confusion_matrix <- data.frame(
+  Predicted_value = c("Model Predicted 1", "Model predicted 0"),
+  Actual_value_was_1 = c("True Positive", "False Negative"),
+  Actual_value_was_0 = c("False Positive", "True Negative"))
+ 
+
+kable(confusion_matrix)
+```
+
+Now that we know how to read a confusion matrix, let's make the testing data frames we need to feed into the models.
+
+```{r}
+#Research Question #1
+#extract only the two columns from the large pre-processed testing dataset we made in step 1 that are needed for the research question: training score and the ostensive binary outcome variable
+testing_data_RQ_1 <- testing_data |> 
+  select(training_score, ostensive_binary) |> 
+      mutate(training_score = as.numeric(training_score),
+         ostensive_binary = as.factor(ostensive_binary))
+
+#Research Question #2
+#extract only the two columns from the large pre-processed dataset that are needed for the research question: training score and the nonostensive binary outcome variable
+testing_data_RQ_2 <- testing_data |> 
+  select(training_score, nonostensive_binary) |> 
+    mutate(training_score = as.numeric(training_score),
+         nonostensive_binary = as.factor(nonostensive_binary))
+
+#Research Question #3
+#take out the two outcome variables that we don't want to use in this analysis but leave every other predictor
+testing_data_RQ_3_factor <- testing_data |> 
+  select(-c(ostensive_binary, nonostensive_binary)) |> 
+mutate(across(c(sex, desexed, purebred, gaze_follow, os_best), as.factor))
+
+```
+
+Now that we have our testing data for each of the three research questions, we can use the two functions in `mlr` that help us look at model outcomes: `predict()` and `performance()`. `predict()` lets us feed a model and new data into the function to get the predicted classification for each observation in the testing data. You then feed the object you made with `predict()` into `performance()` to get the confusion matrix information. Cool, right? Let's do it!
+
+```{r}
+#predicting new values and getting performance metrics for all 3 models run with RQ 1
+#KNN model
+knn_predictions_RQ1 <- predict(KNN_model_RQ_1, newdata = testing_data_RQ_1)
+
+performance(knn_predictions_RQ1)
+
+calculateConfusionMatrix(knn_predictions_RQ1)
+```
+
+The KNN model is classifying 75% of the cases correctly, which sounds okay. However, when we look further into the confusion matrix, we can see that the algorithm is classifying almost every observation as 0 (i.e., that almost every dog was performing below chance at the ostensive task, which we know isn't correct). So, this algorithm is probably not a good one to use when understanding the true relationship between the predictor and variable.
+
+```{r}
+#Decision Tree
+decision_tree_predictions_RQ1 <- predict(decision_tree_model_RQ_1, newdata = testing_data_RQ_1)
+
+performance(decision_tree_predictions_RQ1)
+
+calculateConfusionMatrix(decision_tree_predictions_RQ1)
+```
+
+The decision tree model did even worse than our simplest model as it predicted *every* observation would be 0. Again, not very useable.
+
+```{r}
+#SVM
+SVM_predictions_RQ_1 <- predict(SVM_model_RQ_1, newdata = testing_data_RQ_1)
+
+performance(SVM_predictions_RQ_1)
+
+calculateConfusionMatrix(SVM_predictions_RQ_1)
+```
+
+The SVM algorithm has the same results as our decision tree even though it took 10 times as long to train. Again, not very useable.
+
+Now let's do the same thing for research questions 2.
+
+```{r}
+#predicting new values and getting performance metrics for all 3 models run with RQ 2
+#KNN model
+knn_predictions_RQ2 <- predict(KNN_model_RQ_2, newdata = testing_data_RQ_2)
+
+performance(knn_predictions_RQ2)
+
+calculateConfusionMatrix(knn_predictions_RQ2)
+```
+
+This KNN model performed worse than RQ 1, but had the same issue in that it predicted everything would be 0. (These models really don't think much of our dog's intelligence!)
+
+```{r}
+#Decision Tree
+decision_tree_predictions_RQ2 <- predict(decision_tree_model_RQ_2, newdata = testing_data_RQ_2)
+
+performance(decision_tree_predictions_RQ2)
+
+calculateConfusionMatrix(decision_tree_predictions_RQ2)
+```
+
+This decision tree did just as bad as the KNN.
+
+```{r}
+#SVM
+SVM_predictions_RQ2 <- predict(SVM_model_RQ_2, newdata = testing_data_RQ_2)
+
+performance(SVM_predictions_RQ2)
+
+calculateConfusionMatrix(SVM_predictions_RQ2)
+```
+
+This algorithm did slightly better than the KNN model but still had similar issues.
+
+Now let's do the same thing for research question 3!
+
+```{r}
+#predicting new values and getting performance metrics for all 3 models run with RQ 2
+#KNN model
+knn_predictions_RQ3 <- predict(KNN_model_RQ_3, newdata = testing_data_RQ_3_factor)
+
+performance(knn_predictions_RQ3)
+
+#Dig deeper into predictions with a confusion matrix
+calculateConfusionMatrix(knn_predictions_RQ3)
+```
+
+Unlike in RQ 1 and 2, the algorithm now is predicted that everything will be 1 (i.e., that all dogs will perform better at the nonostensive task than the ostensive, which doesn't fit what we know about how dogs use human cueing). This is also not a very helpful algorithm to use in the future.
+
+```{r}
+#Random Forest
+randomforest_predictions_RQ3 <- predict(random_forest_model_RQ_3, newdata = testing_data_RQ_3_factor)
+
+#Measure how well the model did at predictions
+performance(randomforest_predictions_RQ3)
+
+#Dig deeper into predictions with a confusion matrix
+calculateConfusionMatrix(randomforest_predictions_RQ3)
+```
+
+The random forest algorithm has the exact same results as the KNN.
