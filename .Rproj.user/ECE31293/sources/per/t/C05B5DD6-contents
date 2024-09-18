@@ -518,6 +518,7 @@ LR_model_RQ_1_loocv <- suppressMessages({
 
 LR_model_RQ_1_loocv$aggr
 ```
+
 As predicted, this model did *NOT* do a good job at predicting the correct category for our dogs. 
 
 ## Generic Naive Bayes Example
