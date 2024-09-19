@@ -1,7 +1,9 @@
 project:
   type: book
 
-
+publish:
+  - gh-pages
+  
 book:
   cover-image: "cover.jpg"
   title: "Beginners Guide to Machine Learning Binary Classification Problems in R"

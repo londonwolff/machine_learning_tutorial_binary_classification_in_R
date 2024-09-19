@@ -3,7 +3,7 @@
     "path": "~/ADML LAB (lmwolff3@gmail.com)/machine_learning_tutorial_binary_classification_in_R/_quarto.yml",
     "project_path": "_quarto.yml",
     "type": "yaml",
-    "hash": "714183939",
+    "hash": "3519197342",
     "contents": "",
     "dirty": false,
     "created": 1725641522035.0,
@@ -12,15 +12,15 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "47,0",
-        "scrollLine": "29"
+        "cursorPosition": "1,12",
+        "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1726700741,
+    "lastKnownWriteTime": 1726708035,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1726700741158,
+    "last_content_update": 1726708035348,
     "read_only": false,
     "read_only_alternatives": []
 }
