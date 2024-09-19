@@ -536,17 +536,17 @@ true      0 1 -err.-
 <span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Measure how well the model did at predictions</span></span>
 <span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="fu">performance</span>(randomforest_predictions_RQ3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>     mmce 
-0.2907801 </code></pre>
+<pre><code>      mmce 
+0.03546099 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Dig deeper into predictions with a confusion matrix</span></span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">calculateConfusionMatrix</span>(randomforest_predictions_RQ3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        predicted
-true      0 1 -err.-
-  0      98 0      0
-  1      41 2     41
-  -err.- 41 0     41</code></pre>
+true      0  1 -err.-
+  0      93  5      5
+  1       0 43      0
+  -err.-  0  5      5</code></pre>
 </div>
 </div>
 <p>The random forest algorithm has the exact same results as the KNN.</p>

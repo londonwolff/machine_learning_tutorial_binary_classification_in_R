@@ -565,7 +565,7 @@ mmce.test.mean=0.2842099</code></pre>
 </div>
 </div>
 <p>Now we have the answer to what some optimal hyperparameter values will be for the SVM for this task! However, if you run the above code multiple times you will notice that you don’t get the same results. This is because it isn’t searching through every possible option; rather, it tells you the best option from the random hyperparameters it happened to search through this time. This suggests that if this model appears to perform among the best compared to the other models you’ve evaluated, it’s worthwhile to revisit this step and conduct additional cross-validation iterations before settling on the final model hyperparameters.</p>
-<p>I ran the above code 3 times, and it always chooses a polynomial for the kernel function so we could set polynomial and then just re-tune the other three hyperparameters. Across the 3 iterations, the algorithm choose degree 2 twice and 3 once. The cost and gamma functions changed more widely with values for cost ranging from 1.99 to 9.11. Values for gamma ranged from 3.93 to 9.18.</p>
+<p>I ran the above code 3 times, and it always chooses a polynomial for the kernel function so we could set polynomial and then just re-tune the other three hyperparameters. Across the 3 iterations, the algorithm choose degree 2 twice and 3 once. The cost and gamma functions changed more widely with values for cost ranging from 1.99 to 9.28. Values for gamma ranged from 3.93 to 9.28.</p>
 <p>Let’s put the most recent hyperparameters into the learner and then run the model with our cross validation approach!</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Make the SVM Learner</span></span>
@@ -778,10 +778,10 @@ Op. pars: k=39
 mmce.test.mean=0.2433409</code></pre>
 </div>
 </div>
-<p>The answer was 43 so we will now use that value of k for our learner.</p>
+<p>The answer was 39 so we will now use that value of k for our learner.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Creating the KNN learner for RQ1</span></span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>knn_learner_RQ_3 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.knn"</span>, <span class="at">par.vals =</span> <span class="fu">list</span>(<span class="st">"k"</span><span class="ot">=</span><span class="dv">34</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>knn_learner_RQ_3 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.knn"</span>, <span class="at">par.vals =</span> <span class="fu">list</span>(<span class="st">"k"</span><span class="ot">=</span><span class="dv">39</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we run the learner with the task and cross validation and get our prediction accuracy.</p>
 <div class="cell">
@@ -866,10 +866,10 @@ Op. pars: mtry=16
 mmce.test.mean=0.0355088</code></pre>
 </div>
 </div>
-<p>And the result was that 1 was the best value to use for <code>mtry</code>. Now we have to update the learner with the tuned parameter and plug everything into the <code>resampling</code> function and make the model.</p>
+<p>And the result was that 16 was the best value to use for <code>mtry</code>. Now we have to update the learner with the tuned parameter and plug everything into the <code>resampling</code> function and make the model.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Update the learner</span></span>
-<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>randomforest_learner_RQ_3 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.randomForest"</span>, <span class="at">par.vals =</span> <span class="fu">list</span>(<span class="st">"mtry"</span><span class="ot">=</span><span class="dv">1</span>))</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>randomforest_learner_RQ_3 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.randomForest"</span>, <span class="at">par.vals =</span> <span class="fu">list</span>(<span class="st">"mtry"</span><span class="ot">=</span><span class="dv">16</span>))</span>
 <span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Train the Model</span></span>
 <span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>random_forest_model_RQ_3 <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
@@ -889,7 +889,7 @@ mmce.test.mean=0.0355088</code></pre>
 <span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>random_forest_model_RQ_3_loocv<span class="sc">$</span>aggr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>mmce.test.mean  acc.test.mean 
-     0.2202487      0.7797513 </code></pre>
+    0.04262877     0.95737123 </code></pre>
 </div>
 </div>
 <p>Both the random forest model and the KNN model performed the same when they were cross validated.</p>

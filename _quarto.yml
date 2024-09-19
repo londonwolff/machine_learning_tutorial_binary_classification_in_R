@@ -54,3 +54,5 @@ format:
 
 editor: visual
 
+render:
+  cache: TRUE
