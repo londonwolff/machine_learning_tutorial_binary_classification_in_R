@@ -343,7 +343,7 @@ ul.task-list li input[type="checkbox"] {
 <h2 data-number="14.1" class="anchored" data-anchor-id="choosing-an-algorithm"><span class="header-section-number">14.1</span> Choosing an Algorithm</h2>
 <p>Throughout this tutorial so far, I have introduced you to 5 main model types: Logistic regression, K nearest neighbors, Naive Bayes, Decision trees/Random forest, and Support vector machines. Let’s go through a brief description of what each model does some of the pros and cons of each, as well as what type of predictor and outcome variables each can handle. (I do not plan to explain each algorithm to such depth that you understand the math. That is beyond the scope of this tutorial but there is a linked video describing each algorithm type in detail which gives you an amazing starting point.)</p>
 <ol type="1">
-<li><a href="https://www.youtube.com/watch?v=yIYKR4sgzI8" id="logisticregression">Logistic Regression</a> - Logistic regression fits a S shaped squiggle to data.</li>
+<li>Logistic Regression {#logisticregression} - <a href="https://www.youtube.com/watch?v=yIYKR4sgzI8">Logistic regression</a> fits a S shaped squiggle to data.</li>
 </ol>
 <ul>
 <li>Pros: it is easily interpretable, and it doesn’t assume normally distributed data.</li>
@@ -352,7 +352,7 @@ ul.task-list li input[type="checkbox"] {
 <li>Predictor variable type: Takes both categorical and continuous predictor variables</li>
 </ul>
 <ol start="2" type="1">
-<li><a href="https://www.youtube.com/watch?v=HVXime0nQeI" id="knn">K nearest neighbors</a>(KNN) - KNN algorithms assign unknown data to a category based on what category its neighbors are listed as. For example, if you specify that k is 3, it will look at the classifications of the three closest points to the new data and tell you that your new data is the category that is the average value of the three points. If all three points belong to one category, your new point belongs to that category. If two points belong to one category it will also tell you that your new value belongs to that category.</li>
+<li>K nearest neighbors (KNN) {#knn}- <a href="https://www.youtube.com/watch?v=HVXime0nQeI">KNN algorithms</a> assign unknown data to a category based on what category its neighbors are listed as. For example, if you specify that k is 3, it will look at the classifications of the three closest points to the new data and tell you that your new data is the category that is the average value of the three points. If all three points belong to one category, your new point belongs to that category. If two points belong to one category it will also tell you that your new value belongs to that category.</li>
 </ol>
 <ul>
 <li>Pros: Simple to understand, makes no assumptions about data</li>
@@ -361,7 +361,7 @@ ul.task-list li input[type="checkbox"] {
 <li>Predictor variable type: Takes both categorical and continuous predictor variables</li>
 </ul>
 <ol start="3" type="1">
-<li><a href="https://www.youtube.com/watch?v=O2L2Uv9pdDA&amp;t=228s" id="naivebayes">Naive Bayes</a> - Multiples the probabilities of each feature being found in a particular dataset. For example, if the probability of a dog being 2 years old is 6/10 for the correct choice and 2/10 for the incorrect choice, those probabilities are multiplied with all other probabilities for each variable, and the category with the higher value per observation tells the computer which bin to classify the observation in.</li>
+<li>Naive Bayes {#naivebayes} - A <a href="https://www.youtube.com/watch?v=O2L2Uv9pdDA&amp;t=228s">Naiva Bayes</a> algorithm multiples the probabilities of each feature being found in a particular dataset. For example, if the probability of a dog being 2 years old is 6/10 for the correct choice and 2/10 for the incorrect choice, those probabilities are multiplied with all other probabilities for each variable, and the category with the higher value per observation tells the computer which bin to classify the observation in.</li>
 </ol>
 <ul>
 <li>Pros: Doesn’t need to be tuned for hyperparameters; computationally inexpensive; can handle minimal amount of missing data if need be (good rule of thumb is less than 5% per column); works best on classifying based on words</li>
@@ -370,7 +370,7 @@ ul.task-list li input[type="checkbox"] {
 <li>Predictor variable type: Takes both categorical and continuous predictor variables</li>
 </ul>
 <ol start="4" type="1">
-<li><a href="https://www.youtube.com/watch?v=_L39rN6gz7Y">Decision Tress/Random forest</a>}{#decisiontrees} - A decision tree is a flow chart made by the algorithm that follows a line of logic to its conclusion. You start at the <strong>root</strong> and you go down a branch based on a feature of the data (i.e.&nbsp;high or low score on training) until you reach a <strong>leaf</strong> (bin) that has your final guess for which category a new datapoint should belong to. <strong>Node’s</strong> are any point between the start of the tree and a leaf where the algorithm makes a decision to move from branch to branch to leaf. Each node (decision point) partitions predictors based on values that best categorize outcome variables.</li>
+<li>Decision Tress/Random forest {#decisiontrees} - <a href="https://www.youtube.com/watch?v=_L39rN6gz7Y">A decision tree</a>is a flow chart made by the algorithm that follows a line of logic to its conclusion. You start at the <strong>root</strong> and you go down a branch based on a feature of the data (i.e.&nbsp;high or low score on training) until you reach a <strong>leaf</strong> (bin) that has your final guess for which category a new datapoint should belong to. <strong>Node’s</strong> are any point between the start of the tree and a leaf where the algorithm makes a decision to move from branch to branch to leaf. Each node (decision point) partitions predictors based on values that best categorize outcome variables.</li>
 </ol>
 <ul>
 <li>Pros: Flexible; easily interpretable; no assumptions; more robust to missing data than most other algorithms (good rule of thumb is no more than 10% per column though as predictive accuracy gets worse the more missingness you have); good with outliers. Running multiple decesion trees on different subsections of the data and averaging prediction outcomes is called a random forest. This is easy to remember as many trees creates a forest.</li>
@@ -379,7 +379,7 @@ ul.task-list li input[type="checkbox"] {
 <li>Predictor variable type: Takes both categorical and continuous predictor variables; for random forest you need many predictors to make the forest necessary.</li>
 </ul>
 <ol start="5" type="1">
-<li><a href="https://www.youtube.com/watch?v=efR1C6CvhmE" id="svm">Support Vector Machines</a> - Fits the best line possible to data that separates the categories. However, unlike linear or logistic regression it checks all kinds of lines whether that be linear (regular line), polynomial (curved line), sigmoid (S shape), or radial (circle).</li>
+<li>Support Vector Machines {#svm} - <a href="https://www.youtube.com/watch?v=efR1C6CvhmE">SVMs</a> fit the best line possible to data that separates the categories. However, unlike linear or logistic regression it checks all kinds of lines whether that be linear (regular line), polynomial (curved line), sigmoid (S shape), or radial (circle).</li>
 </ol>
 <ul>
 <li>Pros: Doesn’t assume independence in predictors so can be used if you have collinearity or interdependence; performs well on a wide variety of tasks; makes very few assumptions; often works very well on complex nonlinear data structures</li>
@@ -446,7 +446,7 @@ ul.task-list li input[type="checkbox"] {
 <p>KNN models can be run for all of the research question because the assumptions are met and the predictors and outcome variables match what a KNN model needs.</p>
 <p>Naive Bayes will not be run for any of the models because the independence assumption is violated and cannot be easily worked around by transforming variables or taking into account grouping structure. Furthermore, the normality assumption of the continuous predictor variables is violated for research question 3.</p>
 <p>Random forest models could be run in theory for all the questions, because the assumptions are met and the predictors and outcome variables match what the model needs. However, running a random forest with only one continuous predictor is a waste of computational power as it won’t give you anything meaningful with so little data. (Remember, random forest models are built by making a large number of individual trees and averaging the results). You could run just one decision tree, which is what we will do below. Running an entire random forest model with one predictor is sort of like using a sharpened chefs knife to saw a piece of wood in half- it’ll get the job done but it’ll take forever and you’ve wasted a very good knife.</p>
-<p>Support vector machines will be run for research questions 1 and 2, but not 3. The assumptions are met but, SVM can only handle continuous predictor variables. We have a number of variables we believe to be important that are categorical in nature, so we will not run a SVM model for research question 3.wh</p>
+<p>Support vector machines will be run for research questions 1 and 2, but not 3. The assumptions are met but, SVM can only handle continuous predictor variables. We have a number of variables we believe to be important that are categorical in nature, so we will not run a SVM model for research question 3.</p>
 
 
 </section>
