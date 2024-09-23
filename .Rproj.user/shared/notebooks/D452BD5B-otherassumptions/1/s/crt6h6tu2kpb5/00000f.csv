@@ -1,2 +1,0 @@
-"0","manydogs_transformed <- manydogs_missing_handled %>%"
-"0","  mutate_at(vars(age, training_score, aggression_score, fear_score, separation_score, excitability_score, attachment_score, miscellaneous_score), scale)"

@@ -1,2 +1,0 @@
-"0","write.csv(training_data, file = ""training_data.csv"")"
-"0","write.csv(testing_data, file = ""testing_data.csv"")"

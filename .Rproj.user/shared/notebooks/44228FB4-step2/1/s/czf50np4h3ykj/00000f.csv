@@ -1,5 +1,0 @@
-"0","set.seed(1234567) # ensures randomized outputs are reproducible"
-"0",""
-"0","train_indices <- sample(1:nrow(manydogs_transformed), 0.8 * nrow(manydogs_transformed)) #Grabs a random subset of the data. In this case we asked for 80% of the data to be sampled which is the standard"
-"0","training_data <- manydogs_transformed[train_indices, ] #Grab the 80% of the data you just pulled out and call it training"
-"0","testing_data <- manydogs_transformed[-train_indices, ] # Grab the other 20% not in the train indices and call it testing"

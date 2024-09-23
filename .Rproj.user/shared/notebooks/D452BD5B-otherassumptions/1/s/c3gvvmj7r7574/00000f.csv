@@ -1,2 +1,0 @@
-"0","#Plots for Age"
-"0","age_qqplot <- qqnorm(manydogs_missing_handled$age)"
