@@ -1,0 +1,60 @@
+project:
+  type: book
+
+publish:
+  - gh-pages
+  
+book:
+  cover-image: "cover.jpg"
+  title: "Beginners Guide to Machine Learning Binary Classification Problems in R"
+  author: "London Wolff"
+  date: last-modified
+  date-format: iso
+  chapters:
+    - index.qmd
+    - part: "Introduction to Machine Learning"
+      chapters: 
+        - whatisML.qmd
+        - whatisclassML.qmd
+    - part: "Data & Research Questions"
+      chapters: 
+        - datadescription.qmd
+        - beforeyoubegin.qmd
+        - researchqs.qmd
+    - part: "Step 1: Exploring Data & Checking Assumptions"
+      chapters: 
+        - datacleaning.qmd
+        - twoassumptions.qmd
+        - otherassumptions.qmd
+        - modelassumptions.qmd
+        - regularization.qmd
+    - part: "Step 2: Randomly Partition the Data"
+      chapters:
+        - step2.qmd
+    - part: "Step 3: Run Repeated Cross Validation"
+      chapters:
+        - step3.qmd
+    - part: "Step 4: Choose an Algorithm and Run with Hyperparameters"
+      chapters:
+        - step4.qmd
+        - runningmodels.qmd
+    - part: "Step 5: Assess Model Performance"
+      chapters:
+        - step5.qmd
+    - part: "Conclusion and Supporting Information"
+      chapters:
+        - conclusion.qmd
+        - glossary.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrreprt
+
+editor: visual
+
+render:
+  cache: TRUE

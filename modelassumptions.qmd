@@ -1,0 +1,26 @@
+```{r, include=FALSE}
+library(knitr)
+```
+
+## Algorithms to Run Based on Assumption Checks
+
+Now that we know what assumptions were violated and which were true of our data, we need to look at which models will perform well on each of the three research questions. Let's review the table we made above for each of the assumption checks we did. A "No" means that there was no issue with this model assumption (the assumption was satisfied), while a "Yes" means that there was an issue with the model assumption (the assumption was violated). Take a moment to refresh on each section: where were there problems with each assumption?
+
+```{r, echo=FALSE}
+assumptiontable2 <- data.frame(
+  Model = c("Research Question 1", "Research Question 2", "Research Question 3"),
+  Independence = c("Yes", "Yes", "Yes"),
+  Normality = c("No", "No", "Yes"),
+  No_Outliers = c("No", "No", "No"),
+  Linearity = c("Yes", "Yes", "No"), 
+  High_Dimensionality = c("No", "No", "No"),
+  Feature_Scaling = c("No", "No", "No"))
+
+kable(assumptiontable2)
+```
+
+As you can see, we had issues with independence across all three of our research questions. Because our observations are grouped and dependent on each other, we should eliminate the two models where this assumption must be met: Naive Bayes and Logistic Regression. We also had issues with normality in the data to be used for our third research question. This would eliminate Naive Bayes from the possible models for the third question, but since we already eliminated this model, its violation of that assumption does not change our decision. There were no issues with feature scaling, high dimensionality, linearity, or strong outliers.
+
+To hear more about choosing a model see step [4A](#4a) below.
+
+Now that I told you all about assumption checks and how important they are, I'll let you in on a dirty little secret: if all you care about is predicting what category a subject belongs to and nothing about interpretability (and you are running multiple models), it doesn't really matter if the assumptions are met. 🤯 This is because models whose assumptions are not met will perform worse than models that do meet assumptions, though in some cases, the violations may be minor enough to not significantly affect prediction accuracy. However, it is never a good idea to run algorithms without understanding your data and the relationships within your data. In research especially, we are rarely concerned only with prediction. If you want to understand the real-world phenomena the model is approximating and/or why a particular subject is in a specific category, you need interpretability. Furthermore, running models is time consuming and computationally expensive, and it is best practice to go through all the pre-processing steps before running a model to save resources. The only time you can run models without checking assumptions is when you want an input/output machine that will tell you what category something belongs based solely on features.

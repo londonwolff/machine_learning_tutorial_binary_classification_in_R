@@ -1,0 +1,17 @@
+{
+  "hash": "26737d61786b17842aadde3221b5c4a4",
+  "result": {
+    "engine": "knitr",
+    "markdown": "### Set Up your R Document\n\nMake sure you have the latest versions of R and Rstudio downloaded and open. You will then need to [create a new project in R](https://www.earthdatascience.org/courses/earth-analytics/document-your-science/intro-to-the-rmarkdown-format-and-knitr/), name it, and then open an R document, either a script or a markdown file to begin following along with the tutorial.\n\nThe following libraries (often called dependencies) are needed to run this tutorial in R. Before you code anything, make sure you have the following packages [installed and updated](https://www.neonscience.org/resources/learning-hub/tutorials/packages-r). The below code should be copied and pasted to your R document before any other code is written as you need the tools in these libraries/dependencies to complete the tutorial. Throughout the code chunks in this tutorial I have written comments that tell you what each step in the data process does.\n\n\n\n\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(tidyverse) # for data wrangling\nlibrary(knitr) # for showing you pretty pictures and making tables\nlibrary(here) # for keeping track of where to get files needed for this tutorial\nlibrary(janitor) # for examining and cleaning data\nlibrary(ggpubr) # to make Q-Q plots for testing normality\nlibrary(car) # for making component plus resistance (CR) plots to check for linearity\nlibrary(mlr) # for doing machine learning in R!\nlibrary(parallelMap) # for running code using all of the available processing power on your computer\nlibrary(parallel) # for running code using all of the available processing power on your computer\nlibrary(randomForest) # for running the random forest algorithm\n```\n:::\n\n\n\n\n\n\n\n\n### Open and View Data\n\nOnce you have downloaded the data files from the GitHub repo and loaded all the necessary dependencies make sure the data file manydogs_etal_2024_data is in the same file path as the R file you are working in. When they are in the same file path you can use the following code to read the data into your R file and begin working with the data!\n\n\n\n\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nmanydogs_data <- read.csv(\"manydogs_etal_2024_data.csv\") # Read in the data file I will be using\n\nhead(colnames(manydogs_data), n = 20) #show first 20 names of each column in the data\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n [1] \"date\"                     \"site\"                    \n [3] \"subject_id\"               \"experiment_status\"       \n [5] \"owned_status\"             \"birthdate\"               \n [7] \"sex\"                      \"age\"                     \n [9] \"desexed\"                  \"purebred\"                \n[11] \"breed\"                    \"breed_registry\"          \n[13] \"mixed_breed\"              \"communication_method\"    \n[15] \"gesture_frequency\"        \"gaze_follow\"             \n[17] \"training_type\"            \"training_freq_puppy\"     \n[19] \"training_freq_neighbor\"   \"training_freq_obedience1\"\n```\n\n\n:::\n:::\n",
+    "supporting": [
+      "beforeyoubegin_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

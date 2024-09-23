@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>15&nbsp; Running your models – Beginners Guide to Machine Learning Binary Classification Problems in R</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./step5.html" rel="next">
+<link href="./step4.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./step4.html">Step 4: Choose an Algorithm and Run with Hyperparameters</a></li><li class="breadcrumb-item"><a href="./runningmodels.html"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Running your models</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Beginners Guide to Machine Learning Binary Classification Problems in R</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview &amp; Scope of Tutorial</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Introduction to Machine Learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./whatisML.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">What is Machine Learning?</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./whatisclassML.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">What is Classification Machine Learning and How Do You Do It?</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Data &amp; Research Questions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datadescription.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Data Description</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./beforeyoubegin.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Set Up your R Document</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./researchqs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Research Questions to Investigate</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Step 1: Exploring Data &amp; Checking Assumptions</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datacleaning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Data Set-up: Tidying and Feature Selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./twoassumptions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Two Model Assumptions to Rule Them All: Handling N\&gt;P and Missing Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./otherassumptions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Other Model Assumptions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./modelassumptions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Algorithms to Run Based on Assumption Checks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./regularization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Regularization AKA how to fix overfitting and collinearity</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Step 2: Randomly Partition the Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./step2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Step 2: Randomly Partition the Data into Training and Test Sections</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Step 3: Run Repeated Cross Validation</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./step3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Step 3: Repeated Cross Validation</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Step 4: Choose an Algorithm and Run with Hyperparameters</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./step4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Step 4: Choosing Algorithms &amp; Running Models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./runningmodels.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Running your models</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Step 5: Assess Model Performance</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./step5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Step 5: Compare Model Outcomes</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">Conclusion and Supporting Information</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./conclusion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Concluding Insights</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Glossary of Terms</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#creating-the-task" id="toc-creating-the-task" class="nav-link active" data-scroll-target="#creating-the-task"><span class="header-section-number">15.0.1</span> Creating the Task</a></li>
+  <li><a href="#creating-models-for-question-1" id="toc-creating-models-for-question-1" class="nav-link" data-scroll-target="#creating-models-for-question-1"><span class="header-section-number">15.0.2</span> Creating Models for Question 1</a></li>
+  <li><a href="#creating-models-for-question-2" id="toc-creating-models-for-question-2" class="nav-link" data-scroll-target="#creating-models-for-question-2"><span class="header-section-number">15.0.3</span> Creating Models for Question 2</a></li>
+  <li><a href="#creating-models-for-question-3" id="toc-creating-models-for-question-3" class="nav-link" data-scroll-target="#creating-models-for-question-3"><span class="header-section-number">15.0.4</span> Creating Models for Question 3</a></li>
+  <li><a href="#generic-logistic-regression-example" id="toc-generic-logistic-regression-example" class="nav-link" data-scroll-target="#generic-logistic-regression-example"><span class="header-section-number">15.1</span> Generic Logistic Regression Example</a></li>
+  <li><a href="#generic-naive-bayes-example" id="toc-generic-naive-bayes-example" class="nav-link" data-scroll-target="#generic-naive-bayes-example"><span class="header-section-number">15.2</span> Generic Naive Bayes Example</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./step4.html">Step 4: Choose an Algorithm and Run with Hyperparameters</a></li><li class="breadcrumb-item"><a href="./runningmodels.html"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Running your models</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Running your models</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Now after all that explanation we finally get to the good part, running the actual models!</p>
+<p>In 2016 a package came out called <code>mlr</code> (machine learning in R) that created a suite of tools to create machine learning models quickly and efficiently in R. This package is the only R package we will need for this section of the tutorial. The <code>mlr</code> package breaks creating machine learning models into three smaller steps:</p>
+<ol type="1">
+<li>Define the <span id="task">task</span>: This step consists of passing the data into an object and labeling what the outcome variable is.</li>
+<li>Define the <span id="learner">learner</span>/model: A learner defines the structure of the algorithm. In this step you define/list the model type you want to use (i.e., logistic regression, KNN, random forest, etc.) and then the specific <a href="#hyperparameters">hyperparameters</a> you want the model to use. (i.e., what k to use in a KNN model) Learner is not a general term used throughout machine learning but instead is specific to the <code>mlr</code> package. You can also think of this step as defining your model.</li>
+<li><span id="train">Train</span> the model with the appropriate cross validation approach: Put it all together along with the specified cross validation approach. At this step you create an object that takes the task, learner, and any other additional features and uses that information to output the trained model you can use to make predictions.</li>
+</ol>
+<section id="creating-the-task" class="level3" data-number="15.0.1">
+<h3 data-number="15.0.1" class="anchored" data-anchor-id="creating-the-task"><span class="header-section-number">15.0.1</span> Creating the Task</h3>
+<p>To define the <a href="#task">task</a> we will use the <code>makeClassifTask()</code> which defines a classification task. If doing regression tasks, you would use the function <code>makeRegrTask()</code>. You then pass the data to the <code>data</code> argument, and the name of the predictor variables to the <code>target</code> argument. For our purposes, we will be defining three tasks because we have three research questions, each with slightly different data representing the different outcomes and predictors. Because we only want to pass the data that is absolutely necessary for each task, we have to make those data frames before we can use them in to create the Task.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Research Question #1</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#extract only the two columns from the large pre-processed training dataset we made in step 1 that are needed for the research question: training score and the ostensive binary outcome variable</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>data_RQ_1 <span class="ot">&lt;-</span> training_data <span class="sc">|&gt;</span>  </span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(training_score, ostensive_binary) <span class="sc">|&gt;</span>  </span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">ostensive_binary =</span> <span class="fu">as.factor</span>(ostensive_binary)) </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Define the Task for RQ #1</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>task_RQ_1 <span class="ot">&lt;-</span> <span class="fu">makeClassifTask</span>(<span class="at">data =</span> data_RQ_1, <span class="at">target =</span> <span class="st">"ostensive_binary"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#Research Question #2</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#extract only the two columns from the large pre-processed dataset that are needed for the research question: training score and the nonostensive binary outcome variable</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>data_RQ_2 <span class="ot">&lt;-</span> training_data <span class="sc">|&gt;</span> </span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(training_score, nonostensive_binary) <span class="sc">|&gt;</span> </span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">nonostensive_binary =</span> <span class="fu">as.factor</span>(nonostensive_binary)) </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#Define the task for RQ #2</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>task_RQ_2 <span class="ot">&lt;-</span> <span class="fu">makeClassifTask</span>(<span class="at">data =</span> data_RQ_2, <span class="at">target =</span> <span class="st">"nonostensive_binary"</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#Research Question #3</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#take out the two outcome variables that we don't want to use in this analysis but grab every other predictor</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>data_RQ_3_factor <span class="ot">&lt;-</span> training_data <span class="sc">|&gt;</span> </span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(ostensive_binary, nonostensive_binary)) <span class="sc">|&gt;</span> </span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(sex, desexed, purebred, gaze_follow, os_best), as.factor))</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>data_RQ_3_numeric <span class="ot">&lt;-</span> data_RQ_3_factor <span class="sc">|&gt;</span> </span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(sex, desexed, purebred, gaze_follow), as.numeric))</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co">#Define the task for RQ #3</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>task_RQ_3_factor <span class="ot">&lt;-</span> <span class="fu">makeClassifTask</span>(<span class="at">data =</span> data_RQ_3_factor, <span class="at">target =</span> <span class="st">"os_best"</span>)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>task_RQ_3_numeric <span class="ot">&lt;-</span> <span class="fu">makeClassifTask</span>(<span class="at">data =</span> data_RQ_3_numeric, <span class="at">target =</span> <span class="st">"os_best"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we have created all the tasks we will need for every model we run! That is why it is nice to define the data before you create the model. We save ourselves extra coding and make our coding more readable.</p>
+</section>
+<section id="creating-models-for-question-1" class="level3" data-number="15.0.2">
+<h3 data-number="15.0.2" class="anchored" data-anchor-id="creating-models-for-question-1"><span class="header-section-number">15.0.2</span> Creating Models for Question 1</h3>
+<p>Since the <a href="#learner">learner</a> defines the model we are using, we will need a learner for each model we plan to run. As we discussed in the previous section, we will be running 3 models for our first and second research questions and two models for our third.</p>
+<p>To create a learner we need to use the <code>makeLearner()</code> function. We will pass to that function what type of algorithm we are using and if it is classification, regression, or unsupervised. We will only be using classification for this tutorial since we want to classify things into groups, so all of our algorithms will start with <code>classif</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Creating the KNN learner for RQ1</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>knn_learner_RQ_1 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.knn"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, we have our learner- but it’s actually missing something: the hyperparameter of what k should be. We need to tell the model how many adjacent data points we want it to use to classify the validation set. Now, we could guess and just make it 3 because that is what we have seen in some examples, but let’s let the math do it for us instead. We can use code to check a bunch of different values and then we can use the value that gives us the best prediction rates. Let’s go!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#finding the best value of k</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#define values to check. Best to check 1 through 10 to start.</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>knnParamSpace_RQ_1 <span class="ot">&lt;-</span> <span class="fu">makeParamSet</span>(<span class="fu">makeDiscreteParam</span>(<span class="st">"k"</span>, <span class="at">values =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#tell the computer to search every value of k we offered (1 thru 10)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>gridSearch_RQ_1 <span class="ot">&lt;-</span> <span class="fu">makeTuneControlGrid</span>()</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#cross validate for the k finding</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>cvForTuning <span class="ot">&lt;-</span> <span class="fu">makeResampleDesc</span>(<span class="st">"RepCV"</span>, <span class="at">folds =</span> <span class="dv">10</span>, <span class="at">reps =</span><span class="dv">20</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Use the tuneParams function and the task we made above to get the best k value</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>tunedk_RQ_1 <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tuneParams</span>(<span class="st">"classif.knn"</span>, <span class="at">task =</span> task_RQ_1, <span class="at">resampling =</span> cvForTuning,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>                          <span class="at">par.set =</span> knnParamSpace_RQ_1, <span class="at">control =</span> gridSearch_RQ_1, <span class="at">show.info =</span> F)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  }) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>You will notice that in the <code>tunedk_RQ_1</code> I have the <code>suppressMessages()</code> function. This is not necessary when running models yourself, and can be deleted from the code. I have added this function throughout the tutorial so that many redundant messages aren’t printed in the final document. You might want to keep this function in your code if you want only the absolutely necessary outputs.</p>
+<p>Now let’s print the result of our tuning:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>tunedk_RQ_1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Tune result:
+Op. pars: k=9
+mmce.test.mean=0.2925956</code></pre>
+</div>
+</div>
+<p>A k of 9 gave us the best mmce or mean misclassification error. The mean misclassification error is a great way to check the prediction accuracy, as it is simply the proportion of cases classified as the wrong class. So currently we have 29% of our data being classed incorrectly. Let’s add this k of 9 into our learner and keep going!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Creating the KNN learner for RQ1</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>knn_learner_RQ_1 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.knn"</span>, <span class="at">par.vals =</span> <span class="fu">list</span>(<span class="st">"k"</span><span class="ot">=</span><span class="dv">9</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we need to put it all together to train our model and then perform cross validation. Remember we already made our cross validation argument in the cross validation section: <code>loocv &lt;- makeResampleDesc(method = "LOO")</code>. The <code>resample()</code> function runs the model multiple times with the data from each of the different cross validation sets. We just have to feed it the task, learner, and cross validation arguments we made earlier.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Training the model while cross validating</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>KNN_model_RQ_1 <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ <span class="fu">train</span>(<span class="at">learner =</span> knn_learner_RQ_1, <span class="at">task =</span> task_RQ_1)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>loocv <span class="ot">&lt;-</span> <span class="fu">makeResampleDesc</span>(<span class="at">method =</span> <span class="st">"LOO"</span>) <span class="co">#cross validation procedure</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Get a sense of how well the model will work in practice with cross validation</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>KNN_model_RQ_1_loocv <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">resample</span>(<span class="at">learner =</span> knn_learner_RQ_1, <span class="at">task =</span> task_RQ_1, </span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">resampling =</span> loocv, <span class="at">measures =</span> <span class="fu">list</span>(mmce, acc))  </span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  }) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now that we made the model and then cross validated it using Leave one out cross validation, we can look at the loss/cost function to see how our model is performing. In this case our loss/cost functions are accuracy (acc) and mean misclassification error (mmce). The <code>aggr()</code> function gives you the two performance metrics I asked the model to pull out in the <code>measures</code> argument. A performance metric tells you how well the model predicted the correct category. As noted above, the <strong>mmce</strong> is mean misclassifications error or the proportion of incorrectly classified cases, and <strong>acc</strong> is the accuracy or the proportion of correctly classified cases. You will notice that the two together add up to 100%, so you really only need one or the other.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Performance</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>KNN_model_RQ_1_loocv<span class="sc">$</span>aggr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mmce.test.mean  acc.test.mean 
+     0.2984014      0.7015986 </code></pre>
+</div>
+</div>
+<p>This model didn’t perform well. We are currently classifying 70% of the data correctly. Let’s run some other models and see if we can do better than this.</p>
+<p>Next on our list is making a decision tree. The argument you will need to make a decision tree (NOT a random forest but just 1 tree) is <code>classif.rpart</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Creating the learner for a Single decision tree</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>decisiontree_learner_RQ_1_and_2 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.rpart"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we can pass our learner to the <code>resample</code> function along with our cross-validation procedure and task.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Training the model </span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>decision_tree_model_RQ_1 <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">train</span>(<span class="at">learner =</span> decisiontree_learner_RQ_1_and_2, </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">task =</span> task_RQ_1)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Checking how well the model does using cross validating</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>decision_tree_model_RQ_1_loocv <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">resample</span>(<span class="at">learner =</span> decisiontree_learner_RQ_1_and_2, </span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">task =</span> task_RQ_1, <span class="at">resampling =</span> loocv, </span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">measures =</span> <span class="fu">list</span>(mmce, acc))</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  })</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now let’s check how well the decision tree model is working with the data by looking at our loss/cost function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Performance of the Decision Tree</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>decision_tree_model_RQ_1_loocv<span class="sc">$</span>aggr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mmce.test.mean  acc.test.mean 
+     0.2841918      0.7158082 </code></pre>
+</div>
+</div>
+<p>The decision tree did a little better than the KNN model did (71% vs 71.5%) but they currently look pretty similar. We won’t see the final differences until they have been evaluated on new unseen data in Step 5. Something to look forward to!</p>
+<p>The third and last model we want to test with this first research question is a SVM model. The SVM model is the most complex and computational expensive model and/that has multiple hyperparameters that need tuning. The four hyper parameters that are most important to tune are <code>kernel</code>, <code>cost</code>, <code>degree</code>, and <code>gamma</code>. Each of the four hyperparameters deals with changing the decision boundary slightly. A <a href="#db">Decision boundary</a> is the hyper-plane (often line or squiggle) that separates the data into two classes.</p>
+<ul>
+<li><code>kernel</code> - The kernel defines what type of line you want the algorithm to fit to the data. There are four possible options: a line, a polynomial, a radial (circle), or a sigmoid. You only need to check the last three because a one degree polynomial is the same as a line, and if you ask the computer to calculate both you are just wasting time and computational power.</li>
+<li><code>cost</code> - This controls how tolerant you will be of misclassifications - i.e., how hard or soft the margin of the decision boundary is. If it’s soft (larger number) it allows misclassifications. If it’s hard (larger number) it doesn’t allow any misclassifications.</li>
+<li><code>degree</code> - This controls how “bendy” the decision boundary is. Higher values mean more bendy. The bendier/squigglier the line, the more it fits the testing data and usually the less it generalizes to new unseen data. See the <a href="regularization.html">regularization section</a> on overfitting/underfitting.</li>
+<li><code>gamma</code> - This controls how much influence the algorithm gives to individual data points. Large values of Gamma mean more intricate decision boundaries (i.e., A more squiggly line that maps every point instead of generalizes with a more linear line) and more likely to have overfitting.</li>
+</ul>
+<p>Now we will define the hyperparameters that we want to tune with the same functions we used to define k up above.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Create vector listing the possible kernels you can </span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>kernels <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"polynomial"</span>, <span class="st">"radial"</span>, <span class="st">"sigmoid"</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>svm_parametercheck <span class="ot">&lt;-</span> <span class="fu">makeParamSet</span>(<span class="fu">makeDiscreteParam</span>(<span class="st">"kernel"</span>, <span class="at">values =</span> kernels),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                                       <span class="fu">makeIntegerParam</span>(<span class="st">"degree"</span>, <span class="at">lower =</span><span class="dv">1</span>, <span class="at">upper =</span> <span class="dv">3</span>),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>                                       <span class="fu">makeNumericParam</span>(<span class="st">"cost"</span>, <span class="at">lower =</span> <span class="fl">0.1</span>, <span class="at">upper =</span><span class="dv">10</span>),</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                                       <span class="fu">makeNumericParam</span>(<span class="st">"gamma"</span>, <span class="at">lower =</span> <span class="fl">0.1</span>, <span class="at">upper =</span> <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now that we have defined what we want the computer to check we have to tell it how to search through the values. Previously, in the KNN model above, we just had the computer search every value between 1 and 10 with <code>makeTuneControlGrid()</code> but if we had the computer look through every value we specified above, we would be waiting a <em>very</em> long time. Instead we will ask the computer to randomly search through a smaller subsection of the values with the <code>makeTuneControlRandom</code> argument. You should search through as many as you have computer power for. Where to start depends on how many values you are searching through. Degree can only be 3 values, so if I was only tuning that hyperparameter, 3 would be the same as searching through every value. However, cost and gamma could be any value between 0.1 and 10, which has hundreds of possible values if we are only going to the hundredths place. Start with a number that would reasonably check at least 5% of values and then run it multiple times. If you consistently get the same values each time you run, you probably have a high enough maximum iteration (below this is defined under <code>maxit</code>) value. If you keep getting very different values each time you run it, increase the maximum iteration value iteratively until you have consistently in results.</p>
+<p>Since this is just an example, though we will choose a small number so it runs quickly. Let’s do that now!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>randomsearch <span class="ot">&lt;-</span> <span class="fu">makeTuneControlRandom</span>(<span class="at">maxit =</span> <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, we will tell our computer to run code using multiple cores (i.e., CPUS) of our computer at once. This helps speed up the computation process by using more of the computer. While the myth that humans only use 10% of their brains is false, computers really don’t use all of their brain unless you tell them to. Check how many cores your computer has with <code>parallel::detectCores()</code>. My machine has 24 CPUS (as you can see in the output below), so we’ll use all of them with the <code>parallelStartSocket</code> function. Note that if you use all of your cores, your computer can’t really do anything else while it is working. So if you want to check email, browse the web, or keep coding during the computation, leave a core or two out.</p>
+<p>We also need a cross validation set for this search. We could use the <code>cvForTuning</code> we made earlier with 10 folds and 20 repetitions of each, but that would create 200 iterations. With that many iterations <code>cvForTuning</code> is likely to find the best hyperparameters for our question - but it would take more than 30 minutes to complete on my 24 core machine. Instead, we will make a new cross validation approach called <code>cvForTuning2</code> with only 5 folds and 5 repetitions creating 25 iterations. This will only take 6 minutes.</p>
+<p>Throughout this tutorial you will notice that there are many instances where we have to iteratively go through multiple options per problem. Over time, working with different code and algorithms, you will develop an intuition for what is the optimal number of iterative steps for different problems. More is always better - except for the costs of time and computational power. Often you will run into the problem of diminishing returns on very large cross validation steps. If it is crucial you get something as correct as possible you might have to run your computer for a whole week. If you had an unlimited resource of computational power, then the best option would be to run millions of iterations to be sure you have the exact right set of hyperparameters. However, one of the primary roles of the data scientist in a non-infinite world is to determine the optimal solution to trade off questions of accuracy, time, and power. Throughout this tutorial I am trying to give you a sense of that intuition. In this tutorial I am trying to show you the decision points to pay attention to as you gain that experience, so you can be more transparent - to yourself, as well as to others - when documenting your choices in those decision points. However, you will not be perfect at this skill overnight. It will develop over time as you became more familiar with machine learning.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#use all of the cpus on your computer</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">parallelStartSocket</span>(<span class="at">cpus =</span> <span class="fu">detectCores</span>())</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">#cross validation procedure for tuning this SVM algorithm</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>cvForTuning2 <span class="ot">&lt;-</span> <span class="fu">makeResampleDesc</span>(<span class="st">"RepCV"</span>, <span class="at">folds =</span> <span class="dv">5</span>, <span class="at">reps =</span><span class="dv">5</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Tune the hyperparameters</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>tunedSvmPars_RQ1 <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tuneParams</span>(<span class="st">"classif.svm"</span>, <span class="at">task =</span> task_RQ_1, </span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">resampling =</span> cvForTuning2, </span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>             <span class="at">par.set =</span> svm_parametercheck, </span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>             <span class="at">control =</span> randomsearch)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>tunedSvmPars_RQ1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Tune result:
+Op. pars: kernel=polynomial; degree=3; cost=5.74; gamma=9.28
+mmce.test.mean=0.2842099</code></pre>
+</div>
+</div>
+<p>Now we have the answer to what some optimal hyperparameter values will be for the SVM for this task! However, if you run the above code multiple times you will notice that you don’t get the same results. This is because it isn’t searching through every possible option; rather, it tells you the best option from the random hyperparameters it happened to search through this time. This suggests that if this model appears to perform among the best compared to the other models you’ve evaluated, it’s worthwhile to revisit this step and conduct additional cross-validation iterations before settling on the final model hyperparameters.</p>
+<p>I ran the above code 3 times, and it always chooses a polynomial for the kernel function so we could set polynomial and then just re-tune the other three hyperparameters. Across the 3 iterations, the algorithm choose degree 2 twice and 3 once. The cost and gamma functions changed more widely with values for cost ranging from 1.99 to 9.28. Values for gamma ranged from 3.93 to 9.28.</p>
+<p>Let’s put the most recent hyperparameters into the learner and then run the model with our cross validation approach!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Make the SVM Learner</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>SVM_learner_tuned_RQ_1 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.svm"</span>, <span class="at">par.vals =</span> tunedSvmPars_RQ1<span class="sc">$</span>x)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Train the model</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>SVM_model_RQ_1 <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">train</span>(<span class="at">learner =</span> SVM_learner_tuned_RQ_1, <span class="at">task =</span> task_RQ_1)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Check model performance with LOOCV </span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>SVM_model_RQ_1_loocv <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">resample</span>(<span class="at">learner =</span> SVM_learner_tuned_RQ_1, </span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">task =</span> task_RQ_1, </span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>           <span class="at">resampling =</span> loocv, </span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>           <span class="at">measures =</span> <span class="fu">list</span>(mmce, acc))</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a><span class="co">#Output the Lost/Cost functions for this model</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>SVM_model_RQ_1_loocv<span class="sc">$</span>aggr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mmce.test.mean  acc.test.mean 
+     0.2824156      0.7175844 </code></pre>
+</div>
+</div>
+<p>The model and cross validation approach took about 6 and a half minutes to run on my 24 CPU computer using all of them in parallel. This model worked about as well as the Decision tree, but better than our KNN. If we took more time to run a wider range of hyperparameters for degree, cost, and gamma, the accuracy of the final model would most likely increase. If you are working through this with me, why don’t you create a cross validation procedure with many more iterations, run it, and then go make lunch and come back and rerun the model code. Did you get a higher accuracy rating? (Also how was your lunch?)</p>
+</section>
+<section id="creating-models-for-question-2" class="level3" data-number="15.0.3">
+<h3 data-number="15.0.3" class="anchored" data-anchor-id="creating-models-for-question-2"><span class="header-section-number">15.0.3</span> Creating Models for Question 2</h3>
+<p>This section will be very similar to the previous learners section, as they have similar constraints and the same predictor variable. The purpose of this section is to show you how to make very small changes in what you feed the model to change the outcome.</p>
+<p>Let’s jump straight into finding the correct value of k that minimizes misclassifications for the KNN model for research question 2. The only thing that we have to change is the task we feed the <code>tuneParams</code> function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#finding the best value of k</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co">#define values to check. Best to start with checking 1 through 10</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>knnParamSpace <span class="ot">&lt;-</span> <span class="fu">makeParamSet</span>(<span class="fu">makeDiscreteParam</span>(<span class="st">"k"</span>, <span class="at">values =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>))</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co">#tell the computer to search every value of k we offered (1 thru 10)</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>gridSearch <span class="ot">&lt;-</span> <span class="fu">makeTuneControlGrid</span>()</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co">#cross validate for the k finding</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>cvForTuning <span class="ot">&lt;-</span> <span class="fu">makeResampleDesc</span>(<span class="st">"RepCV"</span>, <span class="at">folds =</span> <span class="dv">10</span>, <span class="at">reps =</span><span class="dv">20</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Use the tuneParams function and the task we made above to get the best k value</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>tunedk_RQ_2 <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tuneParams</span>(<span class="st">"classif.knn"</span>,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>             <span class="at">task =</span> task_RQ_2, </span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>             <span class="at">resampling =</span> cvForTuning, </span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>             <span class="at">par.set =</span> knnParamSpace, </span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>             <span class="at">control =</span> gridSearch)</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>tunedk_RQ_2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Tune result:
+Op. pars: k=8
+mmce.test.mean=0.2344251</code></pre>
+</div>
+</div>
+<p>The correct k for this research question was 8! Let’s update the learner to include this new hyperparameter setting.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>knn_learner_RQ_2 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.knn"</span>, <span class="at">par.vals =</span> <span class="fu">list</span>(<span class="st">"k"</span><span class="ot">=</span><span class="dv">8</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we can run our model with the new learner, task, and cross validation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Running the KNN model for RQ 2</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>KNN_model_RQ_2 <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">train</span>(<span class="at">learner =</span> knn_learner_RQ_2, <span class="at">task =</span> task_RQ_2)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="co">#Running cross validating</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>KNN_model_RQ_2_loocv <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">resample</span>(<span class="at">learner =</span> knn_learner_RQ_2, </span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>           <span class="at">task =</span> task_RQ_2, </span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">resampling =</span> loocv, </span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">measures =</span> <span class="fu">list</span>(mmce, acc))</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Looking at how this model did</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>KNN_model_RQ_2_loocv<span class="sc">$</span>aggr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mmce.test.mean  acc.test.mean 
+     0.2344583      0.7655417 </code></pre>
+</div>
+</div>
+<p>Interestingly, this model worked better than the previous KNN model with research question 1 (70% vs 77%). So, training score must be slightly more predictive for the nonostensive task.</p>
+<p>To run a decision tree model, we can use the same learner as from research question 1 as we didn’t have to do any tuning. Therefore, we can simply run the decision tree model immediately with the pre-made learner, task, and cross validation procedure.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Trainging the Decision Tree model for RQ #2</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>decision_tree_model_RQ_2 <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="fu">train</span>(<span class="at">learner =</span> decisiontree_learner_RQ_1_and_2, </span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">task =</span> task_RQ_2)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>                                     </span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Cross validating</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>decision_tree_model_RQ_2_loocv <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">resample</span>(<span class="at">learner =</span> decisiontree_learner_RQ_1_and_2, </span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">task =</span> task_RQ_2, </span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">resampling =</span> loocv, </span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">measures =</span> <span class="fu">list</span>(acc))</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Performance of the Decision Tree</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>decision_tree_model_RQ_2_loocv<span class="sc">$</span>aggr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>acc.test.mean 
+    0.7655417 </code></pre>
+</div>
+</div>
+<p>This decision tree had the same accuracy as the KNN model for this research question as far as we can tell from the proportion of correct classifications.</p>
+<p>Now we have to run the SVM and tune it with the new hyperparameters that work best on this task. Most of what we defined above will work with this algorithm, so we don’t need to set new hyperparameters or cv values - we just have to feed the new data to what we already made!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Tuning hyperparameters for SVM model</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>tunedSvmPars_RQ2 <span class="ot">&lt;-</span> <span class="fu">tuneParams</span>(<span class="st">"classif.svm"</span>, <span class="at">task =</span> task_RQ_2, <span class="at">resampling =</span> cvForTuning2, <span class="at">par.set =</span> svm_parametercheck, <span class="at">control =</span> randomsearch)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>[Tune] Started tuning learner classif.svm for parameter set:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>           Type len Def                    Constr Req Tunable Trafo
+kernel discrete   -   - polynomial,radial,sigmoid   -    TRUE     -
+degree  integer   -   -                    1 to 3   -    TRUE     -
+cost    numeric   -   -                 0.1 to 10   -    TRUE     -
+gamma   numeric   -   -                 0.1 to 10   -    TRUE     -</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>With control class: TuneControlRandom</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Imputation value: 1</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Exporting objects to slaves for mode socket: .mlr.slave.options</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Mapping in parallel: mode = socket; level = mlr.tuneParams; cpus = 24; elements = 50.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>[Tune] Result: kernel=polynomial; degree=3; cost=8.28; gamma=2.64 : mmce.test.mean=0.2344627</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co">#show me what hyperparameters worked best</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>tunedSvmPars_RQ2</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="co">#update learner with the choosen hyperparameters</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>SVM_learner_tuned_RQ_2 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.svm"</span>, <span class="at">par.vals =</span> tunedSvmPars_RQ2<span class="sc">$</span>x)</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Run the model  </span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>SVM_model_RQ_2 <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">train</span>(<span class="at">learner =</span> SVM_learner_tuned_RQ_2, <span class="at">task =</span> task_RQ_2)</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a><span class="co">#Run Cross Validation</span></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>SVM_model_RQ_2_loocv <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">resample</span>(<span class="at">learner =</span> SVM_learner_tuned_RQ_2, </span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>           <span class="at">task =</span> task_RQ_2, </span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>           <span class="at">resampling =</span> loocv, </span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>           <span class="at">measures =</span> <span class="fu">list</span>(mmce, acc))</span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co">#performance</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>SVM_model_RQ_2_loocv<span class="sc">$</span>aggr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mmce.test.mean  acc.test.mean 
+     0.2344583      0.7655417 </code></pre>
+</div>
+</div>
+<p>This model was also about the same as the decision tree model on accuracy.</p>
+</section>
+<section id="creating-models-for-question-3" class="level3" data-number="15.0.4">
+<h3 data-number="15.0.4" class="anchored" data-anchor-id="creating-models-for-question-3"><span class="header-section-number">15.0.4</span> Creating Models for Question 3</h3>
+<p>The two models we decided fit with our model assumptions and data for research question 3 are a KNN model and a Random Forest model. We will start by tuning the k hyperparameter for our KNN model. As this has many more predictors than our first two questions, we will investigate with a wider set of ks. If the k that is chosen is at the top of your range (not somewhere in the middle), you haven’t searched through a wide enough range of values.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co">#finding the best value of k</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="co">#define values to check best to check 1 through 10</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>knnParamSpace <span class="ot">&lt;-</span> <span class="fu">makeParamSet</span>(<span class="fu">makeDiscreteParam</span>(<span class="st">"k"</span>, <span class="at">values =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>))</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="co">#tell the computer to search every value of k we offered (1 thru 10)</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>gridSearch <span class="ot">&lt;-</span> <span class="fu">makeTuneControlGrid</span>()</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="co">#cross validate for the k finding</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>cvForTuning <span class="ot">&lt;-</span> <span class="fu">makeResampleDesc</span>(<span class="st">"RepCV"</span>, <span class="at">folds =</span> <span class="dv">10</span>, <span class="at">reps =</span><span class="dv">50</span>)</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Use the tuneParams function and the task we made above to get the best k value</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>tunedk_RQ_1 <span class="ot">&lt;-</span> <span class="fu">tuneParams</span>(<span class="st">"classif.knn"</span>, <span class="at">task =</span> task_RQ_3_numeric, <span class="at">resampling =</span> cvForTuning, <span class="at">par.set =</span> knnParamSpace, <span class="at">control =</span> gridSearch)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>[Tune] Started tuning learner classif.knn for parameter set:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>      Type len Def                                   Constr Req Tunable Trafo
+k discrete   -   - 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,1...   -    TRUE     -</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>With control class: TuneControlGrid</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Imputation value: 1</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Exporting objects to slaves for mode socket: .mlr.slave.options</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Mapping in parallel: mode = socket; level = mlr.tuneParams; cpus = 24; elements = 50.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>[Tune] Result: k=39 : mmce.test.mean=0.2433409</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>tunedk_RQ_1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Tune result:
+Op. pars: k=39
+mmce.test.mean=0.2433409</code></pre>
+</div>
+</div>
+<p>The answer was 39 so we will now use that value of k for our learner.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Creating the KNN learner for RQ1</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>knn_learner_RQ_3 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.knn"</span>, <span class="at">par.vals =</span> <span class="fu">list</span>(<span class="st">"k"</span><span class="ot">=</span><span class="dv">39</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we run the learner with the task and cross validation and get our prediction accuracy.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Training the model </span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>KNN_model_RQ_3 <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">train</span>(<span class="at">learner =</span> knn_learner_RQ_3, <span class="at">task =</span> task_RQ_3_numeric)</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a><span class="co">#cross validating</span></span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>KNN_model_RQ_3_loocv <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">resample</span>(<span class="at">learner =</span> knn_learner_RQ_3, </span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>           <span class="at">task =</span> task_RQ_3_numeric, </span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">resampling =</span> loocv, </span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">measures =</span> <span class="fu">list</span>(acc))</span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a><span class="co">#Preformance</span></span>
+<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a>KNN_model_RQ_3_loocv<span class="sc">$</span>aggr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>acc.test.mean 
+    0.7566607 </code></pre>
+</div>
+</div>
+<p>The KNN model for Research Question 3 did about as good as the models trained on fewer predictors (76%).</p>
+<p>Next is the random forest algorithm. We can first just make a learner with the <code>randomForest</code> model type.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>randomforest_learner_RQ_3 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.randomForest"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Like SVM, random forest algothims also have a number of hyperparameters that need to be investigated and tuned to the correct values before we run the model. In random forest the four hyperparameters that should be tuned as best practice before the model can be run are: <code>ntree</code> <code>mtry</code> <code>nodesize</code> and <code>maxnodes</code>.</p>
+<ul>
+<li><code>ntree</code> - the number of trees you want the model to run</li>
+<li><code>mtry</code> - the number of features/predictors to sample at each node</li>
+<li><code>nodesize</code> - minimum number of observations allowed in a leaf</li>
+<li><code>maxnodes</code> - max number of leaves</li>
+</ul>
+<p>We will let the <code>ntree</code> and <code>nodesize</code> values stay at its default of 500 and 1 respectively as we don’t have a particularly large or small amount of data that would suggest we change the default values. These can always be adjusted later after you have tuned anything else. Before we decide what values to choose for the <code>mtry</code> and <code>maxnodes</code> this is a good time to show you how to check what hyperparameters there are for any specific algorithm. The function <code>getParamSet</code> lists the parameters and the default value where applicable.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getParamSet</span>(<span class="st">"classif.randomForest"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                     Type  len   Def   Constr Req Tunable Trafo
+ntree             integer    -   500 1 to Inf   -    TRUE     -
+mtry              integer    -     - 1 to Inf   -    TRUE     -
+replace           logical    -  TRUE        -   -    TRUE     -
+classwt     numericvector &lt;NA&gt;     - 0 to Inf   -    TRUE     -
+cutoff      numericvector &lt;NA&gt;     -   0 to 1   -    TRUE     -
+strata            untyped    -     -        -   -   FALSE     -
+sampsize    integervector &lt;NA&gt;     - 1 to Inf   -    TRUE     -
+nodesize          integer    -     1 1 to Inf   -    TRUE     -
+maxnodes          integer    -     - 1 to Inf   -    TRUE     -
+importance        logical    - FALSE        -   -    TRUE     -
+localImp          logical    - FALSE        -   -    TRUE     -
+proximity         logical    - FALSE        -   -   FALSE     -
+oob.prox          logical    -     -        -   Y   FALSE     -
+norm.votes        logical    -  TRUE        -   -   FALSE     -
+do.trace          logical    - FALSE        -   -   FALSE     -
+keep.forest       logical    -  TRUE        -   -   FALSE     -
+keep.inbag        logical    - FALSE        -   -   FALSE     -</code></pre>
+</div>
+</div>
+<p>Now we know how to look at the tunable parameters, let’s go back to deciding how to choose what values to use in tuning with <code>mtry</code> and <code>maxnodes</code>. We only have 16 predictors, so let’s do the full range of 1 to 16 for the number of features to sample at each node. For <code>maxnodes</code> we have to choose values less than the number of observations <code>nrow(training_data)</code>. For now, let’s leave it at null so it can grow without restriction because we aren’t as worried about time and computing power with a dataset so small. We only have 1 parameter to tune and so we will do that below:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>forestParamSpace <span class="ot">&lt;-</span> <span class="fu">makeParamSet</span>(<span class="fu">makeIntegerParam</span>(<span class="st">"mtry"</span>, <span class="at">lower =</span> <span class="dv">1</span>, <span class="at">upper =</span> <span class="dv">16</span>))</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>randomsearch_100 <span class="ot">&lt;-</span> <span class="fu">makeTuneControlRandom</span>(<span class="at">maxit =</span> <span class="dv">100</span>)</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>cvForTuning_randomforest <span class="ot">&lt;-</span> <span class="fu">makeResampleDesc</span>(<span class="st">"CV"</span>, <span class="at">iters =</span> <span class="dv">5</span>)</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>tunedForestPars <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tuneParams</span>(<span class="at">learner =</span> randomforest_learner_RQ_3, </span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">task =</span> task_RQ_3_factor, </span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">resampling =</span> cvForTuning_randomforest,</span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>             <span class="at">par.set =</span> forestParamSpace, </span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>             <span class="at">control =</span> randomsearch_100)</span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Show the result</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>tunedForestPars</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Tune result:
+Op. pars: mtry=16
+mmce.test.mean=0.0355088</code></pre>
+</div>
+</div>
+<p>And the result was that 16 was the best value to use for <code>mtry</code>. Now we have to update the learner with the tuned parameter and plug everything into the <code>resampling</code> function and make the model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Update the learner</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>randomforest_learner_RQ_3 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.randomForest"</span>, <span class="at">par.vals =</span> <span class="fu">list</span>(<span class="st">"mtry"</span><span class="ot">=</span><span class="dv">16</span>))</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Train the Model</span></span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>random_forest_model_RQ_3 <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">train</span>(<span class="at">learner =</span> randomforest_learner_RQ_3, <span class="at">task =</span> task_RQ_3_factor)</span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Cross validating</span></span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>random_forest_model_RQ_3_loocv <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">resample</span>(<span class="at">learner =</span> randomforest_learner_RQ_3, </span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">task =</span> task_RQ_3_factor, </span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a>           <span class="at">resampling =</span> loocv, </span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a>           <span class="at">measures =</span> <span class="fu">list</span>(mmce, acc))</span>
+<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Performance</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>random_forest_model_RQ_3_loocv<span class="sc">$</span>aggr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mmce.test.mean  acc.test.mean 
+    0.04262877     0.95737123 </code></pre>
+</div>
+</div>
+<p>Both the random forest model and the KNN model performed the same when they were cross validated.</p>
+</section>
+<section id="generic-logistic-regression-example" class="level2" data-number="15.1">
+<h2 data-number="15.1" class="anchored" data-anchor-id="generic-logistic-regression-example"><span class="header-section-number">15.1</span> Generic Logistic Regression Example</h2>
+<p>While the current data did not call for us to use logistic regression, it is still a useful algorithm to know how to use for many potential problems. So, here is code that you can use to run your own logistic regression.</p>
+<p>We will use the task we created for research question 1. We will have to make a new learner to define our model using the <code>classif.logreg</code> argument for logistic regression. Set the argument <code>predict.type</code> equal to <code>prob</code> if you want the estimated probabilities of each class outputted, as well as what class each observation is predicted to be in. Then all you have to do is put it together and cross validate:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>LR_learner_RQ_1 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.logreg"</span>, <span class="at">predict.type =</span> <span class="st">"prob"</span>)</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>LR_model_RQ_1 <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">train</span>(LR_learner_RQ_1, task_RQ_1)</span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>LR_model_RQ_1_loocv <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">resample</span>(<span class="at">learner =</span> LR_learner_RQ_1, </span>
+<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a>                       <span class="at">task =</span> task_RQ_1,</span>
+<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a>                       <span class="at">resampling =</span> loocv)</span>
+<span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a>LR_model_RQ_1_loocv<span class="sc">$</span>aggr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mmce.test.mean 
+     0.2841918 </code></pre>
+</div>
+</div>
+<p>As predicted, this model did <em>NOT</em> do a good job at predicting the correct category for our dogs.</p>
+</section>
+<section id="generic-naive-bayes-example" class="level2" data-number="15.2">
+<h2 data-number="15.2" class="anchored" data-anchor-id="generic-naive-bayes-example"><span class="header-section-number">15.2</span> Generic Naive Bayes Example</h2>
+<p>As with logistic regression, we had decided not to use Naive Bayes for this example dataset, but having some base code may be handy for those cases where it would be appropriate. Naive Bayes algorithms only have one hyperparameter to tune, <code>laplace</code>. You typically want to add a small value to <code>laplace</code>, as it is just a placeholder that adds that value to all of the probabilities to handle the issue of a zero probability for some features. Unseen feature values (0s) are assigned a small, non-zero probability, which helps prevent zero probabilities from making your probabilities be artificially low (as anything multiplied by 0 is 0), and improves the robustness of the Naive Bayes classifier.</p>
+<p>I will use the <code>task_RQ_1</code> task and we have to make the learner, train the model, and cross validate.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>NB_learner_RQ_1 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.naiveBayes"</span>, <span class="at">par.vals =</span> <span class="fu">list</span>(<span class="st">"laplace"</span> <span class="ot">=</span> <span class="dv">1</span>))</span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>NB_model_RQ_1 <span class="ot">&lt;-</span> <span class="fu">train</span>(<span class="at">learner =</span> NB_learner_RQ_1, </span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">task =</span> task_RQ_1)</span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>NB_model_RQ_1_loocv <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
+<span id="cb65-7"><a href="#cb65-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">resample</span>(<span class="at">learner =</span> NB_learner_RQ_1, </span>
+<span id="cb65-8"><a href="#cb65-8" aria-hidden="true" tabindex="-1"></a>                       <span class="at">task =</span> task_RQ_1,</span>
+<span id="cb65-9"><a href="#cb65-9" aria-hidden="true" tabindex="-1"></a>                       <span class="at">resampling =</span> loocv)</span>
+<span id="cb65-10"><a href="#cb65-10" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb65-11"><a href="#cb65-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb65-12"><a href="#cb65-12" aria-hidden="true" tabindex="-1"></a>NB_model_RQ_1_loocv<span class="sc">$</span>aggr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mmce.test.mean 
+     0.2841918 </code></pre>
+</div>
+</div>
+<p>You’ll notice that we are at about 71.6% accuracy which is less predictive than most of our models. But this and all our other models haven’t been tested with new data - let’s do that now!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./step4.html" class="pagination-link" aria-label="Step 4: Choosing Algorithms &amp; Running Models">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Step 4: Choosing Algorithms &amp; Running Models</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./step5.html" class="pagination-link" aria-label="Step 5: Compare Model Outcomes">
+        <span class="nav-page-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Step 5: Compare Model Outcomes</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
