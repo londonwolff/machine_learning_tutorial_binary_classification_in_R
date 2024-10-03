@@ -291,7 +291,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./conclusion.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">conclusion.html</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Concluding Insights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -302,12 +302,6 @@ ul.task-list li input[type="checkbox"] {
 </li>
       </ul>
   </li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./references.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">References</span></a>
-  </div>
-</li>
     </ul>
     </div>
 </nav>
@@ -394,9 +388,9 @@ ul.task-list li input[type="checkbox"] {
 </table>
 </div>
 </div>
-<p>As you can see, we had issues with independence across all three of our research questions. Because our observations are grouped and dependent on each other, we should eliminate the two models where this assumption must be met: Naive Bayes and Logistic Regression. We also had issues with normality in the data to be used for our third research question. This would eliminate Naive Bayes from the possible models for the third question, but since we already eliminated this model, its violation of that assumption does not change our decision. There were no issues with feature scaling, high dimensionality, linearity, or strong outliers.</p>
+<p>As you can see, we had issues with independence across all three of our research questions. Because our observations are grouped and dependent on each other, we should eliminate the two models where this assumption must be met: Naive Bayes and Logistic Regression. We also had issues with normality in the data to be used for our third research question. This would eliminate Naive Bayes from the possible models for the third question, but since we already eliminated this model, its violation of that assumption does not change our decision. There were no issues with feature scaling, high dimensionality, linearity, or strong outliers. You might notice that you can work around independence issues by adding location as a random effect for logistic regression but mixed effect models are outside the scope of this tutorial.</p>
 <p>To hear more about choosing a model see step <a href="#4a">4A</a> below.</p>
-<p>Now that I told you all about assumption checks and how important they are, I’ll let you in on a dirty little secret: if all you care about is predicting what category a subject belongs to and nothing about interpretability (and you are running multiple models), it doesn’t really matter if the assumptions are met. 🤯 This is because models whose assumptions are not met will perform worse than models that do meet assumptions, though in some cases, the violations may be minor enough to not significantly affect prediction accuracy. However, it is never a good idea to run algorithms without understanding your data and the relationships within your data. In research especially, we are rarely concerned only with prediction. If you want to understand the real-world phenomena the model is approximating and/or why a particular subject is in a specific category, you need interpretability. Furthermore, running models is time consuming and computationally expensive, and it is best practice to go through all the pre-processing steps before running a model to save resources. The only time you can run models without checking assumptions is when you want an input/output machine that will tell you what category something belongs based solely on features.</p>
+<p>Now that I told you all about assumption checks and how important they are, I’ll let you in on a dirty little secret: if all you care about is predicting what category a subject belongs to and nothing about interpretability (and you are running multiple models), it doesn’t really matter if the assumptions are met. 🤯 This is because models whose assumptions are not met will perform worse than models that do meet assumptions, though in some cases, the violations may be minor enough to not significantly affect prediction accuracy. However, it is never a good idea to run algorithms without understanding your data and the relationships within your data. In research especially, we are rarely concerned only with prediction. If you want to understand the real-world phenomena the model is approximating and/or why a particular subject is in a specific category, you need <a href="https://docs.aws.amazon.com/whitepapers/latest/ml-best-practices-healthcare-life-sciences/model-interpretability.html#:~:text=There%20is%20a%20tradeoff%20between,by%20the%20model%20is%20key.">interpretability</a>. Furthermore, running models is time consuming and computationally expensive, and it is best practice to go through all the pre-processing steps before running a model to save resources. The only time you can run models without checking assumptions is when you want an input/output machine that will tell you what category something belongs based solely on features.</p>
 
 
 

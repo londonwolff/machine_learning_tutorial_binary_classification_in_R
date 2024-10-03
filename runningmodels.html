@@ -407,18 +407,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>task_RQ_2 <span class="ot">&lt;-</span> <span class="fu">makeClassifTask</span>(<span class="at">data =</span> data_RQ_2, <span class="at">target =</span> <span class="st">"nonostensive_binary"</span>)</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#Research Question #3</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#take out the two outcome variables that we don't want to use in this analysis but grab every other predictor</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#select the predictor variables we will be using and the outcome variable of os_best</span></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>data_RQ_3_factor <span class="ot">&lt;-</span> training_data <span class="sc">|&gt;</span> </span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(ostensive_binary, nonostensive_binary)) <span class="sc">|&gt;</span> </span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(sex, desexed, purebred, gaze_follow, os_best), as.factor))</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(sex<span class="sc">:</span>miscellaneous_score,nonos_best) <span class="sc">|&gt;</span> </span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(sex, desexed, purebred, gaze_follow, nonos_best), as.factor))</span>
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>data_RQ_3_numeric <span class="ot">&lt;-</span> data_RQ_3_factor <span class="sc">|&gt;</span> </span>
 <span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(sex, desexed, purebred, gaze_follow), as.numeric))</span>
 <span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co">#Define the task for RQ #3</span></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>task_RQ_3_factor <span class="ot">&lt;-</span> <span class="fu">makeClassifTask</span>(<span class="at">data =</span> data_RQ_3_factor, <span class="at">target =</span> <span class="st">"os_best"</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>task_RQ_3_factor <span class="ot">&lt;-</span> <span class="fu">makeClassifTask</span>(<span class="at">data =</span> data_RQ_3_factor, <span class="at">target =</span> <span class="st">"nonos_best"</span>)</span>
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>task_RQ_3_numeric <span class="ot">&lt;-</span> <span class="fu">makeClassifTask</span>(<span class="at">data =</span> data_RQ_3_numeric, <span class="at">target =</span> <span class="st">"os_best"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>task_RQ_3_numeric <span class="ot">&lt;-</span> <span class="fu">makeClassifTask</span>(<span class="at">data =</span> data_RQ_3_numeric, <span class="at">target =</span> <span class="st">"nonos_best"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we have created all the tasks we will need for every model we run! That is why it is nice to define the data before you create the model. We save ourselves extra coding and make our coding more readable.</p>
 </section>
@@ -515,7 +515,7 @@ mmce.test.mean=0.2925956</code></pre>
      0.2841918      0.7158082 </code></pre>
 </div>
 </div>
-<p>The decision tree did a little better than the KNN model did (71% vs 71.5%) but they currently look pretty similar. We won’t see the final differences until they have been evaluated on new unseen data in Step 5. Something to look forward to!</p>
+<p>The decision tree did a little better than the KNN model did (70% vs 71.6%) but they currently look pretty similar. We won’t see the final differences until they have been evaluated on new unseen data in Step 5. Something to look forward to!</p>
 <p>The third and last model we want to test with this first research question is a SVM model. The SVM model is the most complex and computational expensive model and/that has multiple hyperparameters that need tuning. The four hyper parameters that are most important to tune are <code>kernel</code>, <code>cost</code>, <code>degree</code>, and <code>gamma</code>. Each of the four hyperparameters deals with changing the decision boundary slightly. A <a href="#db">Decision boundary</a> is the hyper-plane (often line or squiggle) that separates the data into two classes.</p>
 <ul>
 <li><code>kernel</code> - The kernel defines what type of line you want the algorithm to fit to the data. There are four possible options: a line, a polynomial, a radial (circle), or a sigmoid. You only need to check the last three because a one degree polynomial is the same as a line, and if you ask the computer to calculate both you are just wasting time and computational power.</li>
@@ -767,21 +767,21 @@ k discrete   -   - 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,1...   -    TRUE     -</c
 <pre><code>Mapping in parallel: mode = socket; level = mlr.tuneParams; cpus = 24; elements = 50.</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>[Tune] Result: k=39 : mmce.test.mean=0.2433409</code></pre>
+<pre><code>[Tune] Result: k=42 : mmce.test.mean=0.2433409</code></pre>
 </div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>tunedk_RQ_1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Tune result:
-Op. pars: k=39
+Op. pars: k=42
 mmce.test.mean=0.2433409</code></pre>
 </div>
 </div>
-<p>The answer was 39 so we will now use that value of k for our learner.</p>
+<p>The answer was 35 so we will now use that value of k for our learner.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Creating the KNN learner for RQ1</span></span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>knn_learner_RQ_3 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.knn"</span>, <span class="at">par.vals =</span> <span class="fu">list</span>(<span class="st">"k"</span><span class="ot">=</span><span class="dv">39</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>knn_learner_RQ_3 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.knn"</span>, <span class="at">par.vals =</span> <span class="fu">list</span>(<span class="st">"k"</span><span class="ot">=</span><span class="dv">35</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we run the learner with the task and cross validation and get our prediction accuracy.</p>
 <div class="cell">
@@ -841,9 +841,9 @@ keep.forest       logical    -  TRUE        -   -   FALSE     -
 keep.inbag        logical    - FALSE        -   -   FALSE     -</code></pre>
 </div>
 </div>
-<p>Now we know how to look at the tunable parameters, let’s go back to deciding how to choose what values to use in tuning with <code>mtry</code> and <code>maxnodes</code>. We only have 16 predictors, so let’s do the full range of 1 to 16 for the number of features to sample at each node. For <code>maxnodes</code> we have to choose values less than the number of observations <code>nrow(training_data)</code>. For now, let’s leave it at null so it can grow without restriction because we aren’t as worried about time and computing power with a dataset so small. We only have 1 parameter to tune and so we will do that below:</p>
+<p>Now we know how to look at the tunable parameters, let’s go back to deciding how to choose what values to use in tuning with <code>mtry</code> and <code>maxnodes</code>. We only have 12 predictors, so let’s do the full range of 1 to 12 for the number of features to sample at each node. For <code>maxnodes</code> we have to choose values less than the number of observations <code>nrow(training_data)</code>. For now, let’s leave it at null so it can grow without restriction because we aren’t as worried about time and computing power with a dataset so small. We only have 1 parameter to tune and so we will do that below:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>forestParamSpace <span class="ot">&lt;-</span> <span class="fu">makeParamSet</span>(<span class="fu">makeIntegerParam</span>(<span class="st">"mtry"</span>, <span class="at">lower =</span> <span class="dv">1</span>, <span class="at">upper =</span> <span class="dv">16</span>))</span>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>forestParamSpace <span class="ot">&lt;-</span> <span class="fu">makeParamSet</span>(<span class="fu">makeIntegerParam</span>(<span class="st">"mtry"</span>, <span class="at">lower =</span> <span class="dv">1</span>, <span class="at">upper =</span> <span class="dv">12</span>))</span>
 <span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>randomsearch_100 <span class="ot">&lt;-</span> <span class="fu">makeTuneControlRandom</span>(<span class="at">maxit =</span> <span class="dv">100</span>)</span>
 <span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -862,14 +862,14 @@ keep.inbag        logical    - FALSE        -   -   FALSE     -</code></pre>
 <span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>tunedForestPars</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Tune result:
-Op. pars: mtry=16
-mmce.test.mean=0.0355088</code></pre>
+Op. pars: mtry=1
+mmce.test.mean=0.2415613</code></pre>
 </div>
 </div>
-<p>And the result was that 16 was the best value to use for <code>mtry</code>. Now we have to update the learner with the tuned parameter and plug everything into the <code>resampling</code> function and make the model.</p>
+<p>And the result was that 1 was the best value to use for <code>mtry</code>. Now we have to update the learner with the tuned parameter and plug everything into the <code>resampling</code> function and make the model.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Update the learner</span></span>
-<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>randomforest_learner_RQ_3 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.randomForest"</span>, <span class="at">par.vals =</span> <span class="fu">list</span>(<span class="st">"mtry"</span><span class="ot">=</span><span class="dv">16</span>))</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>randomforest_learner_RQ_3 <span class="ot">&lt;-</span> <span class="fu">makeLearner</span>(<span class="st">"classif.randomForest"</span>, <span class="at">par.vals =</span> <span class="fu">list</span>(<span class="st">"mtry"</span><span class="ot">=</span><span class="dv">1</span>))</span>
 <span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Train the Model</span></span>
 <span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>random_forest_model_RQ_3 <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>({ </span>
@@ -889,7 +889,7 @@ mmce.test.mean=0.0355088</code></pre>
 <span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>random_forest_model_RQ_3_loocv<span class="sc">$</span>aggr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>mmce.test.mean  acc.test.mean 
-    0.04262877     0.95737123 </code></pre>
+     0.2433393      0.7566607 </code></pre>
 </div>
 </div>
 <p>Both the random forest model and the KNN model performed the same when they were cross validated.</p>

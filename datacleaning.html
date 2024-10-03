@@ -325,7 +325,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./conclusion.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">conclusion.html</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Concluding Insights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -336,12 +336,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
       </ul>
   </li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./references.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">References</span></a>
-  </div>
-</li>
     </ul>
     </div>
 </nav>
@@ -372,9 +366,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Before you can begin working with your data you must make sure that each row is a single observation, and each column is a single variable/predictor. This type of data set-up or “wrangling” is known as “tidy data”. There are many readily available tutorials and textbooks that help you understand tidy data and how to clean and wranglde data to make it tidy. I recommend the <a href="https://r4ds.had.co.nz/tidy-data.html">Tidyverse</a> chapter in the R data science textbook to start. Thankfully, the dataset from ManyDogs is already tidy so for this tutorial we can skip this step.</p>
-<p>After your data is tidy, the next step before is to complete feature selection. <a href="#feature"><em>Feature selection</em></a> is a fancy term for removing variables you aren’t going to analyze and creating new ones by computing any necessary variables.</p>
-<p>Many of the changes you complete in this step are decided on through <a href="https://corporatefinanceinstitute.com/resources/data-science/domain-knowledge-data-science/">domain knowledge</a>: applying what you know about the field of research to make judgement calls on what is and isn’t important to the model/data. The rest of our decisions depend on our specific research hypotheses. Anything in the data set that does not specifically pertain to our research hypotheses need to be eliminated to increase statistical power and to compute the model faster to save computing resources. Commonly deleted variables at this stage might include meta-data such as time of day when a survey was completed, or individual scale items when we have calculated the total scores. When domain knowledge doesn’t suffice because you are working in a relatively new field, or past studies have conflicting information, you will want to let machine learning algorithms help choose what to keep and eliminate. See the <a href="#regularization">regularization</a> section for more information.</p>
+<p>Before you can begin working with your data you must make sure that each row is a single observation, and each column is a single variable/predictor. This type of data set-up or “wrangling” is known as “tidy data”. There are many readily available tutorials and textbooks that help you understand tidy data and how to clean and wrangle data to make it tidy. I recommend the <a href="https://r4ds.had.co.nz/tidy-data.html">Tidyverse</a> chapter in the R data science textbook to start. Thankfully, the dataset from ManyDogs is already tidy so for this tutorial we can skip this step.</p>
+<p>After your data is tidy, the next step before is to complete feature selection. <a href="#feature"><em>Feature selection</em></a> is a fancy term for removing variables you aren’t going to analyze and creating new ones by computing any necessary variables. Many of the changes you complete in this step are decided on through <a href="https://corporatefinanceinstitute.com/resources/data-science/domain-knowledge-data-science/">domain knowledge</a>: applying what you know about the field of research to make judgement calls on what is and isn’t important to the model/data. The rest of our decisions depend on our specific research hypotheses. Anything in the data set that does not specifically pertain to our research hypotheses need to be eliminated to increase statistical power and to compute the model faster to save computing resources. Commonly deleted variables at this stage might include meta-data such as time of day when a survey was completed, or individual scale items when we have calculated the total scores. When domain knowledge doesn’t suffice because you are working in a relatively new field, or past studies have conflicting information, you will want to let machine learning algorithms help choose what to keep and eliminate. See the <a href="./regularization.html#regularization">regularization</a> section for more information.</p>
 <p>In our ManyDogs example, our feature selection will include transforming all the levels of scales from words to values, add 0s to denote no household dogs other than the one in the study, computing average scores for each section of the CBARQ, and computing our binary outcome variables. We will then cut any remaining columns that will not be needed for analysis.</p>
 <p>Reminder: The following code should be copied and pasted to get you to the needed dataset that we will be using in this tutorial.</p>
 <div class="cell">
@@ -438,7 +431,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>                                 gaze_follow <span class="sc">==</span> <span class="st">"Usually"</span> <span class="sc">~</span><span class="dv">4</span>,</span>
 <span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>                                 gaze_follow <span class="sc">==</span> <span class="st">"Always"</span> <span class="sc">~</span><span class="dv">5</span>),</span>
 <span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>         <span class="at">num_household_dogs =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(num_household_dogs), <span class="dv">0</span>, num_household_dogs)) <span class="sc">|&gt;</span>  <span class="co">#add 0s to indicate when no other dogs were in the household</span></span>
-<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(cbarq_train_1<span class="sc">:</span>cbarq_train_8,cbarq_aggression_1<span class="sc">:</span>cbarq_miscellaneous_27), as.numeric))  <span class="co">#change character columns to numeric columns so R understand how to use them</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(cbarq_train_1<span class="sc">:</span>cbarq_train_8,cbarq_aggression_1<span class="sc">:</span>cbarq_miscellaneous_27), as.numeric))  <span class="co">#change character columns to numeric columns</span></span>
 <span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a data frame that calculates composite scores for each subset of the scale and computes our three binary outcome variables</span></span>
@@ -463,8 +456,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>         <span class="at">nonostensive =</span> <span class="fu">rowMeans</span>(<span class="fu">select</span>(manydogs_data_transformed,</span>
 <span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>                                        <span class="fu">starts_with</span>(<span class="st">"nonostensive_"</span>)), <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="co">#create proportion correct on nonostensive task</span></span>
 <span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a>         <span class="at">nonostensive_binary =</span> <span class="fu">ifelse</span>(nonostensive <span class="sc">&lt;=</span> <span class="fl">0.5</span>, <span class="dv">0</span>, <span class="dv">1</span>),   <span class="co">#create column that notes if a dog performed over or under chance at the nonostensive task</span></span>
-<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a>         <span class="at">os_best =</span> <span class="fu">ifelse</span>(nonostensive <span class="sc">&gt;</span> ostensive, <span class="dv">1</span>, <span class="dv">0</span>)) <span class="sc">|&gt;</span>   <span class="co">#create column that notes if the dog was better at the nonostensive task</span></span>
-<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">c</span>(sex<span class="sc">:</span>purebred,gaze_follow,training_score<span class="sc">:</span>os_best))<span class="co">#grab the columns we will be using for the analysis in this tutorial</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a>         <span class="at">nonos_best =</span> <span class="fu">ifelse</span>(nonostensive <span class="sc">&gt;</span> ostensive, <span class="dv">1</span>, <span class="dv">0</span>)) <span class="sc">|&gt;</span>   <span class="co">#create column that notes if the dog was better at the nonostensive task</span></span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">c</span>(sex<span class="sc">:</span>purebred,gaze_follow,training_score<span class="sc">:</span>nonos_best))<span class="co">#grab the columns we will be using for the analysis in this tutorial</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
