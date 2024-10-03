@@ -51,8 +51,8 @@ testing_data_RQ_2 <- testing_data |>
 #Research Question #3
 #take out the two outcome variables that we don't want to use in this analysis but leave every other predictor
 testing_data_RQ_3_factor <- testing_data |> 
-  select(-c(ostensive_binary, nonostensive_binary)) |> 
-mutate(across(c(sex, desexed, purebred, gaze_follow, os_best), as.factor))
+  select(c(sex:miscellaneous_score, nonos_best)) |> 
+mutate(across(c(sex, desexed, purebred, gaze_follow, nonos_best), as.factor))
 
 ```
 
@@ -68,7 +68,7 @@ performance(knn_predictions_RQ1)
 calculateConfusionMatrix(knn_predictions_RQ1)
 ```
 
-The KNN model is classifying 75% of the cases correctly, which sounds okay. However, when we look further into the confusion matrix, we can see that the algorithm is classifying almost every observation as 0 (i.e., that almost every dog was performing below chance at the ostensive task, which we know isn't correct). So, this algorithm is probably not a good one to use when understanding the true relationship between the predictor and variable.
+The KNN model is classifying 75% of the cases correctly, which sounds okay. However, when we look further into the confusion matrix, we can see that the algorithm is classifying every observation as 0 (i.e., that almost every dog was performing below chance at the ostensive task, which we know isn't correct). So, this algorithm is probably not a good one to use when understanding the true relationship between the predictor and variable.
 
 ```{r}
 #Decision Tree
@@ -79,7 +79,7 @@ performance(decision_tree_predictions_RQ1)
 calculateConfusionMatrix(decision_tree_predictions_RQ1)
 ```
 
-The decision tree model did even worse than our simplest model as it predicted *every* observation would be 0. Again, not very useable.
+The decision tree model did just as poorly as the simplest model as it predicted *every* observation would be 0. Again, not very useable.
 
 ```{r}
 #SVM
@@ -90,7 +90,7 @@ performance(SVM_predictions_RQ_1)
 calculateConfusionMatrix(SVM_predictions_RQ_1)
 ```
 
-The SVM algorithm has the same results as our decision tree even though it took 10 times as long to train. Again, not very useable.
+The SVM algorithm has the same results as our decision tree except for 1 data point even though it took 10 times as long to train. Again, not very useable.
 
 Now let's do the same thing for research questions 2.
 
@@ -104,7 +104,7 @@ performance(knn_predictions_RQ2)
 calculateConfusionMatrix(knn_predictions_RQ2)
 ```
 
-This KNN model performed worse than RQ 1, but had the same issue in that it predicted everything would be 0. (These models really don't think much of our dog's intelligence!)
+This KNN model had the same issue in that it predicted everything would be 0. (These models really don't think much of our dog's intelligence!)
 
 ```{r}
 #Decision Tree
@@ -126,7 +126,7 @@ performance(SVM_predictions_RQ2)
 calculateConfusionMatrix(SVM_predictions_RQ2)
 ```
 
-This algorithm did slightly better than the KNN model but still had similar issues.
+This algorithm had similar issues to all our other models.
 
 Now let's do the same thing for research question 3!
 
@@ -141,7 +141,7 @@ performance(knn_predictions_RQ3)
 calculateConfusionMatrix(knn_predictions_RQ3)
 ```
 
-Unlike in RQ 1 and 2, the algorithm now is predicted that everything will be 1 (i.e., that all dogs will perform better at the nonostensive task than the ostensive, which doesn't fit what we know about how dogs use human cueing). This is also not a very helpful algorithm to use in the future.
+Again, the algorithm is predicted that everything will be 0 (i.e., that all dogs will perform better at the ostensive task than the nonostensive). This is also not a very helpful algorithm to use in the future.
 
 ```{r}
 #Random Forest

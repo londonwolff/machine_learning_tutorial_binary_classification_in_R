@@ -386,8 +386,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#Research Question #3</span></span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#take out the two outcome variables that we don't want to use in this analysis but leave every other predictor</span></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>testing_data_RQ_3_factor <span class="ot">&lt;-</span> testing_data <span class="sc">|&gt;</span> </span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(ostensive_binary, nonostensive_binary)) <span class="sc">|&gt;</span> </span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(sex, desexed, purebred, gaze_follow, os_best), as.factor))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">c</span>(sex<span class="sc">:</span>miscellaneous_score, nonos_best)) <span class="sc">|&gt;</span> </span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(sex, desexed, purebred, gaze_follow, nonos_best), as.factor))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now that we have our testing data for each of the three research questions, we can use the two functions in <code>mlr</code> that help us look at model outcomes: <code>predict()</code> and <code>performance()</code>. <code>predict()</code> lets us feed a model and new data into the function to get the predicted classification for each observation in the testing data. You then feed the object you made with <code>predict()</code> into <code>performance()</code> to get the confusion matrix information. Cool, right? Let’s do it!</p>
 <div class="cell">
@@ -409,7 +409,7 @@ true       0 1 -err.-
   -err.-  36 0     36</code></pre>
 </div>
 </div>
-<p>The KNN model is classifying 75% of the cases correctly, which sounds okay. However, when we look further into the confusion matrix, we can see that the algorithm is classifying almost every observation as 0 (i.e., that almost every dog was performing below chance at the ostensive task, which we know isn’t correct). So, this algorithm is probably not a good one to use when understanding the true relationship between the predictor and variable.</p>
+<p>The KNN model is classifying 75% of the cases correctly, which sounds okay. However, when we look further into the confusion matrix, we can see that the algorithm is classifying every observation as 0 (i.e., that almost every dog was performing below chance at the ostensive task, which we know isn’t correct). So, this algorithm is probably not a good one to use when understanding the true relationship between the predictor and variable.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Decision Tree</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>decision_tree_predictions_RQ1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(decision_tree_model_RQ_1, <span class="at">newdata =</span> testing_data_RQ_1)</span>
@@ -428,7 +428,7 @@ true       0 1 -err.-
   -err.-  36 0     36</code></pre>
 </div>
 </div>
-<p>The decision tree model did even worse than our simplest model as it predicted <em>every</em> observation would be 0. Again, not very useable.</p>
+<p>The decision tree model did just as poorly as the simplest model as it predicted <em>every</em> observation would be 0. Again, not very useable.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#SVM</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>SVM_predictions_RQ_1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(SVM_model_RQ_1, <span class="at">newdata =</span> testing_data_RQ_1)</span>
@@ -447,7 +447,7 @@ true       0 1 -err.-
   -err.-  35 0     35</code></pre>
 </div>
 </div>
-<p>The SVM algorithm has the same results as our decision tree even though it took 10 times as long to train. Again, not very useable.</p>
+<p>The SVM algorithm has the same results as our decision tree except for 1 data point even though it took 10 times as long to train. Again, not very useable.</p>
 <p>Now let’s do the same thing for research questions 2.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#predicting new values and getting performance metrics for all 3 models run with RQ 2</span></span>
@@ -468,7 +468,7 @@ true      0 1 -err.-
   -err.- 50 0     50</code></pre>
 </div>
 </div>
-<p>This KNN model performed worse than RQ 1, but had the same issue in that it predicted everything would be 0. (These models really don’t think much of our dog’s intelligence!)</p>
+<p>This KNN model had the same issue in that it predicted everything would be 0. (These models really don’t think much of our dog’s intelligence!)</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Decision Tree</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>decision_tree_predictions_RQ2 <span class="ot">&lt;-</span> <span class="fu">predict</span>(decision_tree_model_RQ_2, <span class="at">newdata =</span> testing_data_RQ_2)</span>
@@ -506,7 +506,7 @@ true      0 1 -err.-
   -err.- 50 0     50</code></pre>
 </div>
 </div>
-<p>This algorithm did slightly better than the KNN model but still had similar issues.</p>
+<p>This algorithm had similar issues to all our other models.</p>
 <p>Now let’s do the same thing for research question 3!</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">#predicting new values and getting performance metrics for all 3 models run with RQ 2</span></span>
@@ -528,7 +528,7 @@ true      0 1 -err.-
   -err.- 43 0     43</code></pre>
 </div>
 </div>
-<p>Unlike in RQ 1 and 2, the algorithm now is predicted that everything will be 1 (i.e., that all dogs will perform better at the nonostensive task than the ostensive, which doesn’t fit what we know about how dogs use human cueing). This is also not a very helpful algorithm to use in the future.</p>
+<p>Again, the algorithm is predicted that everything will be 0 (i.e., that all dogs will perform better at the ostensive task than the nonostensive). This is also not a very helpful algorithm to use in the future.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Random Forest</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>randomforest_predictions_RQ3 <span class="ot">&lt;-</span> <span class="fu">predict</span>(random_forest_model_RQ_3, <span class="at">newdata =</span> testing_data_RQ_3_factor)</span>
@@ -536,17 +536,17 @@ true      0 1 -err.-
 <span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Measure how well the model did at predictions</span></span>
 <span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="fu">performance</span>(randomforest_predictions_RQ3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>      mmce 
-0.03546099 </code></pre>
+<pre><code>     mmce 
+0.3049645 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Dig deeper into predictions with a confusion matrix</span></span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">calculateConfusionMatrix</span>(randomforest_predictions_RQ3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        predicted
-true      0  1 -err.-
-  0      93  5      5
-  1       0 43      0
-  -err.-  0  5      5</code></pre>
+true      0 1 -err.-
+  0      98 0      0
+  1      43 0     43
+  -err.- 43 0     43</code></pre>
 </div>
 </div>
 <p>The random forest algorithm has the exact same results as the KNN.</p>

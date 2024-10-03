@@ -1,1 +1,1 @@
-"0","qqline(manydogs_missing_handled$training_score)"
+"0","qqnorm(manydogs_missing_handled$training_score)"

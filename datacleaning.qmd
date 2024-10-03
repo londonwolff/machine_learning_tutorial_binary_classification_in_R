@@ -6,11 +6,9 @@ manydogs_data <- read.csv("manydogs_etal_2024_data.csv")
 
 ## Data Set-up: Tidying and Feature Selection
 
-Before you can begin working with your data you must make sure that each row is a single observation, and each column is a single variable/predictor. This type of data set-up or "wrangling" is known as "tidy data". There are many readily available tutorials and textbooks that help you understand tidy data and how to clean and wranglde data to make it tidy. I recommend the [Tidyverse](https://r4ds.had.co.nz/tidy-data.html) chapter in the R data science textbook to start. Thankfully, the dataset from ManyDogs is already tidy so for this tutorial we can skip this step.
+Before you can begin working with your data you must make sure that each row is a single observation, and each column is a single variable/predictor. This type of data set-up or "wrangling" is known as "tidy data". There are many readily available tutorials and textbooks that help you understand tidy data and how to clean and wrangle data to make it tidy. I recommend the [Tidyverse](https://r4ds.had.co.nz/tidy-data.html) chapter in the R data science textbook to start. Thankfully, the dataset from ManyDogs is already tidy so for this tutorial we can skip this step.
 
-After your data is tidy, the next step before is to complete feature selection. [*Feature selection*](#feature) is a fancy term for removing variables you aren't going to analyze and creating new ones by computing any necessary variables.
-
-Many of the changes you complete in this step are decided on through [domain knowledge](https://corporatefinanceinstitute.com/resources/data-science/domain-knowledge-data-science/): applying what you know about the field of research to make judgement calls on what is and isn't important to the model/data. The rest of our decisions depend on our specific research hypotheses. Anything in the data set that does not specifically pertain to our research hypotheses need to be eliminated to increase statistical power and to compute the model faster to save computing resources. Commonly deleted variables at this stage might include meta-data such as time of day when a survey was completed, or individual scale items when we have calculated the total scores. When domain knowledge doesn't suffice because you are working in a relatively new field, or past studies have conflicting information, you will want to let machine learning algorithms help choose what to keep and eliminate. See the [regularization](#regularization) section for more information.
+After your data is tidy, the next step before is to complete feature selection. [*Feature selection*](#feature) is a fancy term for removing variables you aren't going to analyze and creating new ones by computing any necessary variables. Many of the changes you complete in this step are decided on through [domain knowledge](https://corporatefinanceinstitute.com/resources/data-science/domain-knowledge-data-science/): applying what you know about the field of research to make judgement calls on what is and isn't important to the model/data. The rest of our decisions depend on our specific research hypotheses. Anything in the data set that does not specifically pertain to our research hypotheses need to be eliminated to increase statistical power and to compute the model faster to save computing resources. Commonly deleted variables at this stage might include meta-data such as time of day when a survey was completed, or individual scale items when we have calculated the total scores. When domain knowledge doesn't suffice because you are working in a relatively new field, or past studies have conflicting information, you will want to let machine learning algorithms help choose what to keep and eliminate. See the [regularization](regularization.qmd#regularization) section for more information.
 
 In our ManyDogs example, our feature selection will include transforming all the levels of scales from words to values, add 0s to denote no household dogs other than the one in the study, computing average scores for each section of the CBARQ, and computing our binary outcome variables. We will then cut any remaining columns that will not be needed for analysis.
 
@@ -78,7 +76,7 @@ manydogs_data_transformed <- manydogs_data |>
                                  gaze_follow == "Usually" ~4,
                                  gaze_follow == "Always" ~5),
          num_household_dogs = ifelse(is.na(num_household_dogs), 0, num_household_dogs)) |>  #add 0s to indicate when no other dogs were in the household
-  mutate(across(c(cbarq_train_1:cbarq_train_8,cbarq_aggression_1:cbarq_miscellaneous_27), as.numeric))  #change character columns to numeric columns so R understand how to use them
+  mutate(across(c(cbarq_train_1:cbarq_train_8,cbarq_aggression_1:cbarq_miscellaneous_27), as.numeric))  #change character columns to numeric columns
 
 
 #Create a data frame that calculates composite scores for each subset of the scale and computes our three binary outcome variables
@@ -103,8 +101,8 @@ manydogs_feature_selection <- manydogs_data_transformed |>
          nonostensive = rowMeans(select(manydogs_data_transformed,
                                         starts_with("nonostensive_")), na.rm = TRUE), #create proportion correct on nonostensive task
          nonostensive_binary = ifelse(nonostensive <= 0.5, 0, 1),   #create column that notes if a dog performed over or under chance at the nonostensive task
-         os_best = ifelse(nonostensive > ostensive, 1, 0)) |>   #create column that notes if the dog was better at the nonostensive task
-  select(c(sex:purebred,gaze_follow,training_score:os_best))#grab the columns we will be using for the analysis in this tutorial
+         nonos_best = ifelse(nonostensive > ostensive, 1, 0)) |>   #create column that notes if the dog was better at the nonostensive task
+  select(c(sex:purebred,gaze_follow,training_score:nonos_best))#grab the columns we will be using for the analysis in this tutorial
 
 ```
 

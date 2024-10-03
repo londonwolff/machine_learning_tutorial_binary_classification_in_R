@@ -3,5 +3,20 @@
 "0","library(here)"
 "0","library(ggpubr)"
 "0","library(car)"
-"0",""
+"2","Loading required package: carData
+"
+"2","
+Attaching package: ‘car’
+
+"
+"2","The following object is masked from ‘package:dplyr’:
+
+    recode
+
+"
+"2","The following object is masked from ‘package:purrr’:
+
+    some
+
+"
 "0","manydogs_missing_handled <- read.csv(""manydogs_missing_handled.csv"")"

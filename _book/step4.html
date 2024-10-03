@@ -343,7 +343,7 @@ ul.task-list li input[type="checkbox"] {
 <h2 data-number="14.1" class="anchored" data-anchor-id="choosing-an-algorithm"><span class="header-section-number">14.1</span> Choosing an Algorithm</h2>
 <p>Throughout this tutorial so far, I have introduced you to 5 main model types: Logistic regression, K nearest neighbors, Naive Bayes, Decision trees/Random forest, and Support vector machines. Let’s go through a brief description of what each model does some of the pros and cons of each, as well as what type of predictor and outcome variables each can handle. (I do not plan to explain each algorithm to such depth that you understand the math. That is beyond the scope of this tutorial but there is a linked video describing each algorithm type in detail which gives you an amazing starting point.)</p>
 <ol type="1">
-<li>Logistic Regression {#logisticregression} - <a href="https://www.youtube.com/watch?v=yIYKR4sgzI8">Logistic regression</a> fits a S shaped squiggle to data.</li>
+<li>Logistic Regression {#logisticregression} - <a href="https://www.youtube.com/watch?v=yIYKR4sgzI8">Logistic regression</a> fits a S shaped curve to data to assess the probability of a binary outcome. Where the curve bends is the decision boundary between the two categories. If a point falls on one side of the curve it belongs to the first category if it falls above the top of the curve than it falls into the second category.</li>
 </ol>
 <ul>
 <li>Pros: it is easily interpretable, and it doesn’t assume normally distributed data.</li>
@@ -352,7 +352,7 @@ ul.task-list li input[type="checkbox"] {
 <li>Predictor variable type: Takes both categorical and continuous predictor variables</li>
 </ul>
 <ol start="2" type="1">
-<li>K nearest neighbors (KNN) {#knn}- <a href="https://www.youtube.com/watch?v=HVXime0nQeI">KNN algorithms</a> assign unknown data to a category based on what category its neighbors are listed as. For example, if you specify that k is 3, it will look at the classifications of the three closest points to the new data and tell you that your new data is the category that is the average value of the three points. If all three points belong to one category, your new point belongs to that category. If two points belong to one category it will also tell you that your new value belongs to that category.</li>
+<li>K Nearest Neighbors (KNN) {#knn}- <a href="https://www.youtube.com/watch?v=HVXime0nQeI">KNN algorithms</a> assign unknown data to a category based on what category its neighbors are listed as. For example, if you specify that k is 3, it will look at the classifications of the three closest points to the new data and tell you that your new data is the category that is the average value of the three points. If all three points belong to one category, your new point belongs to that category. If two points belong to one category it will also tell you that your new value belongs to that category.</li>
 </ol>
 <ul>
 <li>Pros: Simple to understand, makes no assumptions about data</li>
@@ -361,7 +361,7 @@ ul.task-list li input[type="checkbox"] {
 <li>Predictor variable type: Takes both categorical and continuous predictor variables</li>
 </ul>
 <ol start="3" type="1">
-<li>Naive Bayes {#naivebayes} - A <a href="https://www.youtube.com/watch?v=O2L2Uv9pdDA&amp;t=228s">Naiva Bayes</a> algorithm multiples the probabilities of each feature being found in a particular dataset. For example, if the probability of a dog being 2 years old is 6/10 for the correct choice and 2/10 for the incorrect choice, those probabilities are multiplied with all other probabilities for each variable, and the category with the higher value per observation tells the computer which bin to classify the observation in.</li>
+<li>Naive Bayes {#naivebayes} - A <a href="https://www.youtube.com/watch?v=O2L2Uv9pdDA&amp;t=228s">Naiva Bayes</a> algorithm multiples the probabilities of each feature being found in a class/category assuming independence. For example, if a dog is less than 2 years old in 6 out of 10 observations than the probability of the feature “the dog is less than 2” is 60%. The probabilities of each feature are multiplied with all other probabilities, and the category with the higher value per observation tells the computer which bin to classify the observation in.</li>
 </ol>
 <ul>
 <li>Pros: Doesn’t need to be tuned for hyperparameters; computationally inexpensive; can handle minimal amount of missing data if need be (good rule of thumb is less than 5% per column); works best on classifying based on words</li>
@@ -370,7 +370,7 @@ ul.task-list li input[type="checkbox"] {
 <li>Predictor variable type: Takes both categorical and continuous predictor variables</li>
 </ul>
 <ol start="4" type="1">
-<li>Decision Tress/Random forest {#decisiontrees} - <a href="https://www.youtube.com/watch?v=_L39rN6gz7Y">A decision tree</a>is a flow chart made by the algorithm that follows a line of logic to its conclusion. You start at the <strong>root</strong> and you go down a branch based on a feature of the data (i.e.&nbsp;high or low score on training) until you reach a <strong>leaf</strong> (bin) that has your final guess for which category a new datapoint should belong to. <strong>Node’s</strong> are any point between the start of the tree and a leaf where the algorithm makes a decision to move from branch to branch to leaf. Each node (decision point) partitions predictors based on values that best categorize outcome variables.</li>
+<li>Decision Tress/Random Forest {#decisiontrees} - <a href="https://www.youtube.com/watch?v=_L39rN6gz7Y">A decision tree</a> is a flow chart made by the algorithm that follows a line of logic to its conclusion. You start at the <strong>root</strong> and you go down a branch based on a feature of the data (i.e.&nbsp;high or low score on training) until you reach a <strong>leaf</strong> (bin) that has your final guess for which category a new datapoint should belong to. <strong>Node’s</strong> are any point between the start of the tree and a leaf where the algorithm makes a decision to move from branch to branch to leaf. Each node (decision point) partitions predictors based on values that best categorize outcome variables.</li>
 </ol>
 <ul>
 <li>Pros: Flexible; easily interpretable; no assumptions; more robust to missing data than most other algorithms (good rule of thumb is no more than 10% per column though as predictive accuracy gets worse the more missingness you have); good with outliers. Running multiple decesion trees on different subsections of the data and averaging prediction outcomes is called a random forest. This is easy to remember as many trees creates a forest.</li>

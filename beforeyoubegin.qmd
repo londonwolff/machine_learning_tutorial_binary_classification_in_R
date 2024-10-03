@@ -19,7 +19,7 @@ library(randomForest) # for running the random forest algorithm
 
 ### Open and View Data
 
-Once you have downloaded the data files from the GitHub repo and loaded all the necessary dependencies make sure the data file manydogs_etal_2024_data is in the same file path as the R file you are working in. When they are in the same file path you can use the following code to read the data into your R file and begin working with the data!
+Once you have downloaded the data files from the GitHub repo and loaded all the necessary dependencies make sure the data file manydogs_etal_2024_data is in the same file path as the R file you are working in. When they are in the same file path you can use the following code to read the data into your R file and begin working!
 
 ```{r, echo=TRUE}
 

@@ -1,4 +1,4 @@
-"","sex","age","desexed","purebred","gaze_follow","training_score","aggression_score","fear_score","separation_score","excitability_score","attachment_score","miscellaneous_score","ostensive","ostensive_binary","nonostensive","nonostensive_binary","os_best"
+"","sex","age","desexed","purebred","gaze_follow","training_score","aggression_score","fear_score","separation_score","excitability_score","attachment_score","miscellaneous_score","ostensive","ostensive_binary","nonostensive","nonostensive_binary","nonos_best"
 "1",1,6.7,1,2,4,2.125,1.05263157894737,1.23529411764706,0,2.16666666666667,2.33333333333333,0.962962962962963,0.75,1,0.75,1,0
 "2",2,0.8,1,2,3,2.75,NA,NA,NA,NA,NA,NA,0.333333333333333,0,0.666666666666667,1,1
 "3",1,6.8,1,2,3,2.875,0.230769230769231,0.166666666666667,0,3,1.5,0.72,0.5,0,0.625,1,1

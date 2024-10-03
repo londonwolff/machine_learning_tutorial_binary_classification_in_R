@@ -42,18 +42,18 @@ data_RQ_2 <- training_data |>
 task_RQ_2 <- makeClassifTask(data = data_RQ_2, target = "nonostensive_binary")
 
 #Research Question #3
-#take out the two outcome variables that we don't want to use in this analysis but grab every other predictor
+#select the predictor variables we will be using and the outcome variable of os_best
 data_RQ_3_factor <- training_data |> 
-  select(-c(ostensive_binary, nonostensive_binary)) |> 
-mutate(across(c(sex, desexed, purebred, gaze_follow, os_best), as.factor))
+  select(sex:miscellaneous_score,nonos_best) |> 
+mutate(across(c(sex, desexed, purebred, gaze_follow, nonos_best), as.factor))
 
 data_RQ_3_numeric <- data_RQ_3_factor |> 
 mutate(across(c(sex, desexed, purebred, gaze_follow), as.numeric))
 
 #Define the task for RQ #3
-task_RQ_3_factor <- makeClassifTask(data = data_RQ_3_factor, target = "os_best")
+task_RQ_3_factor <- makeClassifTask(data = data_RQ_3_factor, target = "nonos_best")
 
-task_RQ_3_numeric <- makeClassifTask(data = data_RQ_3_numeric, target = "os_best")
+task_RQ_3_numeric <- makeClassifTask(data = data_RQ_3_numeric, target = "nonos_best")
 
 ```
 
@@ -170,7 +170,7 @@ Now let's check how well the decision tree model is working with the data by loo
 decision_tree_model_RQ_1_loocv$aggr
 ```
 
-The decision tree did a little better than the KNN model did (71% vs 71.5%) but they currently look pretty similar. We won't see the final differences until they have been evaluated on new unseen data in Step 5. Something to look forward to!
+The decision tree did a little better than the KNN model did (70% vs 71.6%) but they currently look pretty similar. We won't see the final differences until they have been evaluated on new unseen data in Step 5. Something to look forward to!
 
 The third and last model we want to test with this first research question is a SVM model. The SVM model is the most complex and computational expensive model and/that has multiple hyperparameters that need tuning. The four hyper parameters that are most important to tune are `kernel`, `cost`, `degree`, and `gamma`. Each of the four hyperparameters deals with changing the decision boundary slightly. A [Decision boundary](#db) is the hyper-plane (often line or squiggle) that separates the data into two classes.
 
@@ -395,11 +395,11 @@ tunedk_RQ_1 <- tuneParams("classif.knn", task = task_RQ_3_numeric, resampling = 
 tunedk_RQ_1
 ```
 
-The answer was 39 so we will now use that value of k for our learner. 
+The answer was 35 so we will now use that value of k for our learner. 
 
 ```{r}
 #Creating the KNN learner for RQ1
-knn_learner_RQ_3 <- makeLearner("classif.knn", par.vals = list("k"=39))
+knn_learner_RQ_3 <- makeLearner("classif.knn", par.vals = list("k"=35))
 ```
 
 Now we run the learner with the task and cross validation and get our prediction accuracy. 
@@ -445,10 +445,10 @@ We will let the `ntree` and `nodesize` values stay at its default of 500 and 1 r
 ```{r}
 getParamSet("classif.randomForest")
 ```
-Now we know how to look at the tunable parameters, let's go back to deciding how to choose what values to use in tuning with `mtry` and `maxnodes`. We only have 16 predictors, so let's do the full range of 1 to 16 for the number of features to sample at each node. For `maxnodes` we have to choose values less than the number of observations `nrow(training_data)`. For now, let's leave it at null so it can grow without restriction because we aren't as worried about time and computing power with a dataset so small. We only have 1 parameter to tune and so we will do that below:
+Now we know how to look at the tunable parameters, let's go back to deciding how to choose what values to use in tuning with `mtry` and `maxnodes`. We only have 12 predictors, so let's do the full range of 1 to 12 for the number of features to sample at each node. For `maxnodes` we have to choose values less than the number of observations `nrow(training_data)`. For now, let's leave it at null so it can grow without restriction because we aren't as worried about time and computing power with a dataset so small. We only have 1 parameter to tune and so we will do that below:
 
 ```{r echo = T, results = 'hide'}
-forestParamSpace <- makeParamSet(makeIntegerParam("mtry", lower = 1, upper = 16))
+forestParamSpace <- makeParamSet(makeIntegerParam("mtry", lower = 1, upper = 12))
 
 randomsearch_100 <- makeTuneControlRandom(maxit = 100)
 
@@ -468,11 +468,11 @@ tunedForestPars <- suppressMessages({
 tunedForestPars
 ```
 
-And the result was that 16 was the best value to use for `mtry`. Now we have to update the learner with the tuned parameter and plug everything into the `resampling` function and make the model. 
+And the result was that 1 was the best value to use for `mtry`. Now we have to update the learner with the tuned parameter and plug everything into the `resampling` function and make the model. 
 
 ```{r echo = T, results = 'hide'}
 #Update the learner
-randomforest_learner_RQ_3 <- makeLearner("classif.randomForest", par.vals = list("mtry"=16))
+randomforest_learner_RQ_3 <- makeLearner("classif.randomForest", par.vals = list("mtry"=1))
 
 #Train the Model
 random_forest_model_RQ_3 <- suppressMessages({ 

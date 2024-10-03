@@ -1,7 +1,10 @@
+"0",""
+"0",""
+"0","plot(density(manydogs_missing_handled$training_score), main = ""Density Plot of Training Score"")"
 "2","Warning in gzfile(file, ""wb"") :"
 "2","
  "
-"2"," cannot open compressed file 'C:/Users/lmwol/OneDrive - University of Nebraska-Lincoln/Documents/ADML LAB (lmwolff3@gmail.com)/machine_learning_tutorial_binary_classification_in_R/.Rproj.user/shared/notebooks/D452BD5B-otherassumptions/1/s/c7773zrjltpce_t/d734ed88eecb4923922bd9cf579436f9.snapshot', probable reason 'No such file or directory'
+"2"," cannot open compressed file 'C:/Users/lmwol/OneDrive - University of Nebraska-Lincoln/Documents/ADML LAB (lmwolff3@gmail.com)/machine_learning_tutorial_binary_classification_in_R/.Rproj.user/shared/notebooks/D452BD5B-otherassumptions/1/s/c7773zrjltpce_t/0d901664236d487c9547c4dc4e3b0ad5.snapshot', probable reason 'No such file or directory'
 "
 "2","Error in gzfile(file, ""wb"") : cannot open the connection
 "

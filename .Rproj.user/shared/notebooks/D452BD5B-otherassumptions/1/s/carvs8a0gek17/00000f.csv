@@ -1,2 +1,0 @@
-"0","#Create a boxplot for age"
-"0","age_boxplot <- boxplot(manydogs_missing_handled$age)"

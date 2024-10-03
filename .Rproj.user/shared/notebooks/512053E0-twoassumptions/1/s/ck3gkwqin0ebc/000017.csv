@@ -1,7 +1,9 @@
-"2","Warning in gzfile(file, ""wb"") :"
-"2","
- "
-"2"," cannot open compressed file 'C:/Users/lmwol/OneDrive - University of Nebraska-Lincoln/Documents/ADML LAB (lmwolff3@gmail.com)/machine_learning_tutorial_binary_classification_in_R/.Rproj.user/shared/notebooks/512053E0-twoassumptions/1/s/ck3gkwqin0ebc_t/af8a4a8967fe4a6796579647a9de0cf0.snapshot', probable reason 'No such file or directory'
-"
-"2","Error in gzfile(file, ""wb"") : cannot open the connection
-"
+"0","#create vector with how many NAs are in each column in the dataset"
+"0","missing_frequency_in_manydogs_data <- colSums(is.na(manydogs_feature_selection))  "
+"0",""
+"0","#Create a barplot for the values frequency of missing values in the manydogs dataset"
+"0","missing_values_barplot <- barplot(missing_frequency_in_manydogs_data,"
+"0","                              main = ""Number of Missing Values per Column"","
+"0","                              ylab = ""Number of Missing Values"","
+"0","                              las = 2,"
+"0","                              cex.names = .6)"
