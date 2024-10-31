@@ -1,4 +1,23 @@
-# References {.unnumbered}
+---
+title: "References"
+---
 
-::: {#refs}
-:::
+Grant, L., Joo, P., Nemnom, M.-J., & Thiruganasambandamoorthy, V. (2022). Machine learning versus traditional methods for the development of risk stratification scores: A case study using original Canadian Syncope Risk Score data. Internal and Emergency Medicine, 17(4), 1145–1153. https://doi.org/10.1007/s11739-021-02873-y
+G
+rolemund, G., & Wickham, H. (2017). R for Data Science: Import, Tidy, Transform, Visualize, and Model Data (1st edition). O’Reilly Media.
+
+Grolemund, H. W. and G. (n.d.). Welcome | R for Data Science. Retrieved October 2, 2024, from https://r4ds.had.co.nz/
+
+James, G., Witten, D., Hastie, T., & Tibshirani, R. (2013). An Introduction to Statistical Learning: With Applications in R (1st ed. 2013, Corr. 7th printing 2017 edition). Springer.
+
+Medeiros, M. C., Vasconcelos, G. F. R., Veiga, Á., & Zilberman, E. (2021). Forecasting Inflation in a Data-Rich Environment: The Benefits of Machine Learning Methods. Journal of Business & Economic Statistics, 39(1), 98–119. https://doi.org/10.1080/07350015.2019.1637745
+
+PhD, J. S. (2022). The StatQuest Illustrated Guide To Machine Learning. Independently published.
+
+Project, M., Espinosa, J., Hare, E., Alberghina, D., Valverde, B. M. P., & Stevens, J. R. (2024). Data from ManyDogs 1. Journal of Open Psychology Data, 12(1). https://doi.org/10.5334/jopd.109
+
+Rajula, H. S. R., Verlato, G., Manchia, M., Antonucci, N., & Fanos, V. (2020). Comparison of Conventional Statistical Methods with Machine Learning in Medicine: Diagnosis, Drug Development, and Treatment. Medicina, 56(9), Article 9. https://doi.org/10.3390/medicina56090455
+
+Rhys, H. I. (2020). Machine Learning with R, the tidyverse, and mlr (1st edition). Manning.
+
+Wickham, H. (2014). Tidy Data. Journal of Statistical Software, 59, 1–23. https://doi.org/10.18637/jss.v059.i10

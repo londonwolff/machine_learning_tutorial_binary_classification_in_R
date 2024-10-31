@@ -28,8 +28,6 @@ assumptiontable <- data.frame(
 kable(assumptiontable)
 ```
 
-(Table was created by referencing @author)
-
 The above table lists the model assumptions that need to be understood and investigated further. Make sure you investigate these assumptions per *research question*, as different questions will use different data. If an assumption is violated, you can either transform your data to meet the assumption or eliminate that test from your analyses. Below I will show you how to run checks for independence, normality, strong outliers, linearity, [high dimensionality](#np), and how to [feature scale](#featurescaling) your data.
 
 ### Independence

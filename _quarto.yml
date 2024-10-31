@@ -45,6 +45,7 @@ book:
       chapters:
         - conclusion.qmd
         - glossary.qmd
+        - references.qmd
 
 bibliography: references.bib
 
@@ -53,6 +54,7 @@ format:
     theme: cosmo
   pdf:
     documentclass: scrreprt
+    citation_package: natbib
 
 editor: visual
 
